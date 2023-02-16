@@ -79,61 +79,6 @@
 
 \end{frame}
 
-\section{A (Very) Brief Finite Element Refresher}
-
-\begin{frame}{Galerkin Form}
-
-        \onslide<+-> {Given the homogenous Poisson equation in weak form: Find \(u \in \mathcal{S}\) such that
-            \begin{equation*}
-                \int_\Omega v_{,x} u_{,x} \dif \Omega = \int_\Omega vf \dif \Omega \quad \forall v \in \mathcal{V}
-            \end{equation*}}
-
-        \onslide<+-> {
-            Approximate \(\mathcal{S} \approx \mathcal{S}^h = \Span(\{\phi^i\}_i^\ndof)\) and \(\mathcal{V} \approx \mathcal{V}^h = \Span(\{\phi^j\}_j^\ndof)\)
-        }
-        \onslide<+->{
-            \begin{equation*}
-                \bm{Ax} = \bm{b}
-            \end{equation*}
-        }
-        \onslide<+->{
-            \begin{equation*}
-                u = \sum_i^\ndof \phi^i x_i \in \mathcal{S}^h, \quad A_{ij} = \int_{\Omega} \phi^i_{,x} \phi^j_{,x} \dif \Omega, \quad b_j = \int_\Omega \phi^j f \dif \Omega
-            \end{equation*}
-        }
-
-\end{frame}
-
-\begin{frame}{Finite Element Method}
-        \onslide<+-> {
-            Discretize the domain \(\Omega\) into elements \(\Omega^e\)
-            \begin{equation*}
-                \Omega^h = \bigcup_{e=0}^{\nelm} \Omega^e \approx \Omega
-            \end{equation*}
-        }
-        % \onslide<+-> {
-        %     Define finite element function spaces:
-        %     \begin{equation*}
-        %         \mathcal{S}^h \coloneqq \left\{ v^h \in \mathcal{F}(\Omega^h)\right\}
-        %     \end{equation*}
-        % }
-        % \onslide<+-> {
-        %     \begin{equation*}
-        %         A_{ij} = \sum_e^\nelm \int_{\Omega^e} \phi^i_{,x} \phi^j_{,x} \dif \Omega, \quad b_j = \sum_e^\nelm \int_{\Omega^e} \phi^j f \dif \Omega
-        %     \end{equation*}
-        % }
-        \onslide<+->{
-            Approximate the integrals over elements via quadrature \[\int g(x) \dif x \approx \sum_k^\nquad w^k g(\xi^k)\]
-        }
-        \onslide<+->{
-            Thus the final problem can be stated as: Find \(\bm{x} \in \mathbb{R}^\ndof\) in \(\bm{Ax} = \bm{b}\) for
-            \begin{equation*}
-                A_{ij} = \sum_e^\nelm \sum_k^\nquad \left[ w^k \phi^i_{,x}(\xi^k) \phi^j_{,x}(\xi^k) \right]_{\Omega^e}, \quad b_j = \sum_e^\nelm \sum_k^\nquad \left[ w^k \phi^j(\xi^k) f(\xi^k) \right]_{\Omega^e}
-            \end{equation*}
-        }
-
-\end{frame}
-
 \section{libCEED Overview}
 
 \begin{frame}{Finite Element Operator Decomposition}
@@ -164,111 +109,6 @@
 
     \end{tikzpicture}
 
-\end{frame}
-
-% \begin{frame}{libCEED Operator}
-%
-%     \begin{columns}
-%         \column{0.4\textwidth}
-%         \begin{center}
-%             \begin{tabular}{ c c c }
-%             Operator & libCEED Object\\ [0.5ex]
-%             \hline\hline
-%             \onslide<+->{\(\Elem\)   & \footnotesize\texttt{CeedElemRestriction} \\}
-%             \onslide<+->{\(\Bas\)    & \footnotesize\texttt{CeedBasis} \\}
-%             \onslide<+->{\(\DQfunc\) & \footnotesize\texttt{CeedQFunction} \\}
-%             \onslide<+->{\(\ElemT\BasT\DQfunc\Bas\Elem\) & \footnotesize\texttt{CeedOperator}}
-%             \end{tabular}
-%         \end{center}
-%
-%         \column{0.6\textwidth}
-%             \includegraphics[width=\textwidth]{img/libCEED_Operator.pdf}
-%     \end{columns}
-%     \begin{block}{Note}<+->
-%         libCEED implements the operators matrix-free; None of the libCEED Objects store a matrix
-%     \end{block}
-% \end{frame}
-
-\begin{frame}{Defining the libCEED Operator}
-
-    \begin{columns}
-        \column{0.5\textwidth}
-        \onslide<1->{
-            \footnotesize\texttt{CeedElemRestriction}
-            \begin{itemize}
-                \item Defined by element connectivity and the number of components
-            \end{itemize}
-        }
-        \onslide<2->{
-            \footnotesize\texttt{CeedBasis}
-            \begin{itemize}
-                \item Defined by the basis functions and the quadrature rule
-                \item Built-in options for common basis functions and quadrature rules
-            \end{itemize}
-        }
-
-        \column{0.5\textwidth}
-        \onslide<3->{
-            \footnotesize\texttt{CeedQFunction}
-            \begin{itemize}
-                \item C function
-                \item Common operators available (mass, poisson, identity, etc.)
-                \item User defined QFunctions also possible
-            \end{itemize}
-        }
-
-        \onslide<4->{
-            \footnotesize\texttt{CeedOperator}
-            \begin{itemize}
-                \item Computation backend defined at runtime
-                \item Full \(L\) operator (can be) JITed to the desired backend (CUDA, HIP, CPU, etc.)
-            \end{itemize}
-        }
-    \end{columns}
-\end{frame}
-
-\begin{frame}[fragile]{Poisson CeedQFunction}
-    \begin{columns}
-
-        \column{0.4\textwidth}
-        \onslide<1->{
-            \[ \sum_k^\nquad \left[ w^k u_{,x}(\xi^k) v_{,x}(\xi^k) \right]_{\Omega^e} \]
-            \vspace{-20pt}
-            \[\BasT\DQfunc\Bas\]
-        }
-        \vspace{-20pt}
-        \begin{itemize}
-            \item<2-> \texttt{ug=} \(u_{,x}(\xi^k) = \Bas u^e\)
-            \item<3-> \texttt{q\char`_data=} \(w^k\)\footnote<3->{along with jacobian determinant}
-            \item<4-> \texttt{vg=} \(w^k u_{,x}(\xi^k) = \DQfunc\Bas u^e\)
-            \item<5-> \(w^k u_{,x}(\xi^k) v_{,x}(\xi^k) = \BasT \DQfunc \Bas u^e\)
-        \end{itemize}
-
-    \column{0.6\textwidth}
-% \onslide<2->{
-\begin{ccode}
-CEED_QFUNCTION(Poisson1DApply)(void *ctx, const CeedInt Q,
-                               const CeedScalar *const *in,
-                               CeedScalar *const *out) {
-  // in[0] is gradient u, size (Q)
-  // in[1] is quadrature data, size (Q)
-  const CeedScalar *ug = in[0], *q_data = in[1];
-
-  // out[0] is output to multiply against gradient v, size (Q)
-  CeedScalar *vg = out[0];
-
-  // Quadrature point loop
-  CeedPragmaSIMD
-  for (CeedInt i=0; i<Q; i++) {
-    vg[i] = ug[i] * q_data[i];
-  } // End of Quadrature Point Loop
-
-  return CEED_ERROR_SUCCESS;
-}
-\end{ccode}
-% }
-
-    \end{columns}
 \end{frame}
 
 \section{Fluid Simulations with libCEED}
@@ -370,3 +210,165 @@ CEED_QFUNCTION(Poisson1DApply)(void *ctx, const CeedInt Q,
 \section*{Questions?}
 
 \end{document}
+
+% \section{A (Very) Brief Finite Element Refresher}
+%
+% \begin{frame}{Galerkin Form}
+%
+%         \onslide<+-> {Given the homogenous Poisson equation in weak form: Find \(u \in \mathcal{S}\) such that
+%             \begin{equation*}
+%                 \int_\Omega v_{,x} u_{,x} \dif \Omega = \int_\Omega vf \dif \Omega \quad \forall v \in \mathcal{V}
+%             \end{equation*}}
+%
+%         \onslide<+-> {
+%             Approximate \(\mathcal{S} \approx \mathcal{S}^h = \Span(\{\phi^i\}_i^\ndof)\) and \(\mathcal{V} \approx \mathcal{V}^h = \Span(\{\phi^j\}_j^\ndof)\)
+%         }
+%         \onslide<+->{
+%             \begin{equation*}
+%                 \bm{Ax} = \bm{b}
+%             \end{equation*}
+%         }
+%         \onslide<+->{
+%             \begin{equation*}
+%                 u = \sum_i^\ndof \phi^i x_i \in \mathcal{S}^h, \quad A_{ij} = \int_{\Omega} \phi^i_{,x} \phi^j_{,x} \dif \Omega, \quad b_j = \int_\Omega \phi^j f \dif \Omega
+%             \end{equation*}
+%         }
+%
+% \end{frame}
+%
+% \begin{frame}{Finite Element Method}
+%         \onslide<+-> {
+%             Discretize the domain \(\Omega\) into elements \(\Omega^e\)
+%             \begin{equation*}
+%                 \Omega^h = \bigcup_{e=0}^{\nelm} \Omega^e \approx \Omega
+%             \end{equation*}
+%         }
+%         % \onslide<+-> {
+%         %     Define finite element function spaces:
+%         %     \begin{equation*}
+%         %         \mathcal{S}^h \coloneqq \left\{ v^h \in \mathcal{F}(\Omega^h)\right\}
+%         %     \end{equation*}
+%         % }
+%         % \onslide<+-> {
+%         %     \begin{equation*}
+%         %         A_{ij} = \sum_e^\nelm \int_{\Omega^e} \phi^i_{,x} \phi^j_{,x} \dif \Omega, \quad b_j = \sum_e^\nelm \int_{\Omega^e} \phi^j f \dif \Omega
+%         %     \end{equation*}
+%         % }
+%         \onslide<+->{
+%             Approximate the integrals over elements via quadrature \[\int g(x) \dif x \approx \sum_k^\nquad w^k g(\xi^k)\]
+%         }
+%         \onslide<+->{
+%             Thus the final problem can be stated as: Find \(\bm{x} \in \mathbb{R}^\ndof\) in \(\bm{Ax} = \bm{b}\) for
+%             \begin{equation*}
+%                 A_{ij} = \sum_e^\nelm \sum_k^\nquad \left[ w^k \phi^i_{,x}(\xi^k) \phi^j_{,x}(\xi^k) \right]_{\Omega^e}, \quad b_j = \sum_e^\nelm \sum_k^\nquad \left[ w^k \phi^j(\xi^k) f(\xi^k) \right]_{\Omega^e}
+%             \end{equation*}
+%         }
+%
+% \end{frame}
+
+
+% ------------ Backup slides (old ones that may get reused later)
+% \begin{frame}{libCEED Operator}
+%
+%     \begin{columns}
+%         \column{0.4\textwidth}
+%         \begin{center}
+%             \begin{tabular}{ c c c }
+%             Operator & libCEED Object\\ [0.5ex]
+%             \hline\hline
+%             \onslide<+->{\(\Elem\)   & \footnotesize\texttt{CeedElemRestriction} \\}
+%             \onslide<+->{\(\Bas\)    & \footnotesize\texttt{CeedBasis} \\}
+%             \onslide<+->{\(\DQfunc\) & \footnotesize\texttt{CeedQFunction} \\}
+%             \onslide<+->{\(\ElemT\BasT\DQfunc\Bas\Elem\) & \footnotesize\texttt{CeedOperator}}
+%             \end{tabular}
+%         \end{center}
+%
+%         \column{0.6\textwidth}
+%             \includegraphics[width=\textwidth]{img/libCEED_Operator.pdf}
+%     \end{columns}
+%     \begin{block}{Note}<+->
+%         libCEED implements the operators matrix-free; None of the libCEED Objects store a matrix
+%     \end{block}
+% \end{frame}
+
+% \begin{frame}{Defining the libCEED Operator}
+%
+%     \begin{columns}
+%         \column{0.5\textwidth}
+%         \onslide<1->{
+%             \footnotesize\texttt{CeedElemRestriction}
+%             \begin{itemize}
+%                 \item Defined by element connectivity and the number of components
+%             \end{itemize}
+%         }
+%         \onslide<2->{
+%             \footnotesize\texttt{CeedBasis}
+%             \begin{itemize}
+%                 \item Defined by the basis functions and the quadrature rule
+%                 \item Built-in options for common basis functions and quadrature rules
+%             \end{itemize}
+%         }
+%
+%         \column{0.5\textwidth}
+%         \onslide<3->{
+%             \footnotesize\texttt{CeedQFunction}
+%             \begin{itemize}
+%                 \item C function
+%                 \item Common operators available (mass, poisson, identity, etc.)
+%                 \item User defined QFunctions also possible
+%             \end{itemize}
+%         }
+%
+%         \onslide<4->{
+%             \footnotesize\texttt{CeedOperator}
+%             \begin{itemize}
+%                 \item Computation backend defined at runtime
+%                 \item Full \(L\) operator (can be) JITed to the desired backend (CUDA, HIP, CPU, etc.)
+%             \end{itemize}
+%         }
+%     \end{columns}
+% \end{frame}
+
+% \begin{frame}[fragile]{Poisson CeedQFunction}
+%     \begin{columns}
+%
+%         \column{0.4\textwidth}
+%         \onslide<1->{
+%             \[ \sum_k^\nquad \left[ w^k u_{,x}(\xi^k) v_{,x}(\xi^k) \right]_{\Omega^e} \]
+%             \vspace{-20pt}
+%             \[\BasT\DQfunc\Bas\]
+%         }
+%         \vspace{-20pt}
+%         \begin{itemize}
+%             \item<2-> \texttt{ug=} \(u_{,x}(\xi^k) = \Bas u^e\)
+%             \item<3-> \texttt{q\char`_data=} \(w^k\)\footnote<3->{along with jacobian determinant}
+%             \item<4-> \texttt{vg=} \(w^k u_{,x}(\xi^k) = \DQfunc\Bas u^e\)
+%             \item<5-> \(w^k u_{,x}(\xi^k) v_{,x}(\xi^k) = \BasT \DQfunc \Bas u^e\)
+%         \end{itemize}
+%
+%     \column{0.6\textwidth}
+% % \onslide<2->{
+% \begin{ccode}
+% CEED_QFUNCTION(Poisson1DApply)(void *ctx, const CeedInt Q,
+%                                const CeedScalar *const *in,
+%                                CeedScalar *const *out) {
+%   // in[0] is gradient u, size (Q)
+%   // in[1] is quadrature data, size (Q)
+%   const CeedScalar *ug = in[0], *q_data = in[1];
+%
+%   // out[0] is output to multiply against gradient v, size (Q)
+%   CeedScalar *vg = out[0];
+%
+%   // Quadrature point loop
+%   CeedPragmaSIMD
+%   for (CeedInt i=0; i<Q; i++) {
+%     vg[i] = ug[i] * q_data[i];
+%   } // End of Quadrature Point Loop
+%
+%   return CEED_ERROR_SUCCESS;
+% }
+% \end{ccode}
+% % }
+%
+%     \end{columns}
+% \end{frame}
