@@ -1,0 +1,15 @@
+.history
+*.synctex.gz
+*.xdv
+.ipynb_checkpoints
+
+# Cmake Stuff
+CMakeFiles
+CMakeCache.txt
+CMakeScripts
+cmake_install.cmake
+Makefile
+
+# Build directory
+build/*
+!build/*.pdf
