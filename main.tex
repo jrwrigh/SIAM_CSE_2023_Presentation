@@ -107,6 +107,8 @@
         \invisible<5->{\draw[ultra thin,white,fill=white] (10, 0) rectangle (0, 2);}
     \end{scope}
 
+    % TODO Add a "processors" tag to the image
+
     \end{tikzpicture}
 
 \end{frame}
@@ -149,6 +151,8 @@
         0
     \end{pmatrix}
     \end{equation*}
+
+    \todo{convert to primitive variable formulation}
 \end{frame}
 
 \begin{frame}{Compressible Navier-Stokes for FEM}
@@ -189,6 +193,13 @@
     \end{itemize}
 \end{frame}
 
+\begin{frame}{Something Implicit Timestepping}
+    Should mention implicit timestepping since it's in the title
+    \begin{itemize}
+        \item Big point is the matrix-free exact Jacobian evaluation
+    \end{itemize}
+\end{frame}
+
 \begin{frame}{Time Step Loop}
     \begin{enumerate}
         \item<+-> PETSc gets \(\bm{U}^L = \Part \bm{U}^G\) from current solution
@@ -196,15 +207,6 @@
         \item<+-> PETSc gets \(\bm{G}^G = \PartT \bm{G}^L\)
         \item<+-> PETSc uses \(\bm{G}^G\) to compute new solution value \onslide<+->{...or whatever else it wants}
     \end{enumerate}
-\end{frame}
-
-\begin{frame}{Other Misc Things}
-    Other features not discussed/shown that are in the libCEED-Fluids example
-    \begin{itemize}
-        \item Primitive variables
-        \item Synthetic turbulence inflow boundary conditions
-        \item Shock capturing
-    \end{itemize}
 \end{frame}
 
 \section*{Questions?}
