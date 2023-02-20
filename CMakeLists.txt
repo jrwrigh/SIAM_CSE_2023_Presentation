@@ -1,4 +1,4 @@
-project(CMGLab_STG_Presentation NONE)
+project(SIAM_CSE_2023 NONE)
 cmake_minimum_required(VERSION 3.19)
 SET(LATEX_OUTPUT_PATH build)
 SET(PDFLATEX_COMPILER xelatex)
@@ -8,7 +8,7 @@ CACHE STRING "Flags passed to latex."
 )
 INCLUDE(UseLATEX.cmake)
 
-# file(GLOB_RECURSE contents_files RELATIVE ${CMAKE_SOURCE_DIR} source/*.tex)
+# file(GLOB_RECURSE contents_files RELATIVE ${CMAKE_SOURCE_DIR} source/*)
 
 ADD_LATEX_DOCUMENT(
     main.tex
