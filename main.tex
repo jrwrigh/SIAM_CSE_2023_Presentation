@@ -13,6 +13,7 @@
 \usepackage{todonotes}
 \presetkeys{todonotes}{inline}{}
 
+\usepackage{esdiff}
 \usepackage{minted}
 
 \newminted{c}{fontsize=\tiny,
@@ -49,6 +50,7 @@
 \newcommand{\Bas}{\textcolor[HTML]{0f75ff}{B}}
 \newcommand{\BasT}{\textcolor[HTML]{0f75ff}{B^T}}
 \newcommand{\DQfunc}{\textcolor[HTML]{009900}{D}}
+\newcommand{\Qfunc}[1]{\textcolor[HTML]{009900}{#1}}
 \newcommand{\nelm}{{n_{\mathrm{elm}}}}
 \newcommand{\ndof}{{n_{\mathrm{dof}}}}
 \newcommand{\nquad}{{n_{\mathrm{quad}}}}
@@ -69,10 +71,10 @@
                 \item<+-> Bindings for Fortran, Rust, Python, and Julia available
             \end{itemize}
         \item<+-> Designed for matrix-free operator evaluation
-        \item<+-> Capable of running on GPU/Accelerator hardware
+        \item<+-> Portable to different hardware via computational backends
             \begin{itemize}
                 \item<+-> Code that runs on CPU also runs on GPU without changes
-                \item<+-> Computational backend selectable at runtime via JIT compilation
+                \item<+-> Computational backend selectable at runtime, using runtime compilation
             \end{itemize}
         \item<+-> Geared toward high-order element discretizations
     \end{itemize}
@@ -170,9 +172,53 @@
 
     \onslide<3->{
         Further simplified into residual form:
-        \begin{equation*}
-            \mathcal{G}(\bm{U}_{,t}, \bm{U}) = 0
-        \end{equation*}
+        \begin{align*}
+            \mathcal{G}(\bm{U}_{,t}, \bm{U}) &=0 \\
+            \onslide<4->{\Rightarrow \quad \PartT \ElemT \BasT \Qfunc{G} \Bas \Elem \Part &= 0}
+        \end{align*}
+    }
+\end{frame}
+
+\begin{frame}{Implicit Timestepping}
+    Implicit timestepping requires solving:
+    \begin{equation*}
+        \diff{\mathcal{G}(\bm{U}_{,t}, \bm{U})}{\bm{U}} \Delta \bm{U} = \mathcal{G}(\bm{U}_{,t}, \bm{U})
+    \end{equation*}
+    \vspace{-30pt}
+    \begin{itemize}
+        \item<2-> Store \(\frac{\mathrm{d} \mathcal{G}}{\mathrm{d}\bm{U}}\)directly
+            \begin{itemize}
+                \item Pros: Opens up preconditioning options
+                \item Cons: Is large, expensive to store
+            \end{itemize}
+        \item<3-> Finite difference matrix-free approximation:
+            \begin{equation*}
+                \diff{\mathcal{G}(\bm{U}_{,t}, \bm{U})}{\bm{U}} \Delta \bm{U} \approx \frac{\mathcal{G}(\bm{U}_{,t}, \bm{U} + \epsilon \Delta \bm{U}) - \mathcal{G}(\bm{U}_{,t}, \bm{U})} {\epsilon}
+            \end{equation*}
+            \vspace{-20pt}
+            \begin{itemize}
+                \item Pros: Just need a residual evaluation, cheap (in programming and computation)
+                \item Cons: Approximation, accuracy limited to \(\sqrt{\epsilon_{\text{machine}}}\)
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Exact Matrix-Free Jacobian}
+    \begin{align*}
+        \onslide<+->{\diff{\mathcal{G}}{\bm{U}} \Delta \bm{U} &= \diff{}{\bm{U}} \left[\mathcal{G}(\bm{U}_{,t}, \bm{U})\right] \Delta \bm{U} \\}
+        \onslide<+->{ &= \diff{}{\bm{U}} \left[ \PartT \ElemT \BasT \Qfunc{G} \Bas \Elem \Part \right] \Delta \bm{U} \\}
+        \onslide<+->{ &= \left[ \PartT \ElemT \BasT \diff{\Qfunc{G}}{\bm{U}}  \Bas \Elem \Part \right]\Delta \bm{U} \\}
+    \end{align*}
+    \vspace{-50pt}
+    \onslide<+->{
+    \begin{itemize}
+        \item Store intermediary data at quadrature points to improve efficiency ("taping")
+            \begin{itemize}
+                \item We store \(\bm{U}\), viscous stress, and stabilization perturbation (\(\mathcal{P}(\bm{v})\))
+            \end{itemize}
+        \item Pros: Exact Jacobian matrix-vector product (potentially faster convergence)
+        \item Cons: More expensive than residual evaluation (but not by too much)
+    \end{itemize}
     }
 \end{frame}
 
@@ -193,13 +239,6 @@
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Something Implicit Timestepping}
-    Should mention implicit timestepping since it's in the title
-    \begin{itemize}
-        \item Big point is the matrix-free exact Jacobian evaluation
-    \end{itemize}
-\end{frame}
-
 \begin{frame}{Time Step Loop}
     \begin{enumerate}
         \item<+-> PETSc gets \(\bm{U}^L = \Part \bm{U}^G\) from current solution
@@ -216,12 +255,28 @@
     \begin{itemize}
         \item \(Re_\theta \approx 970\) boundary layer at inflow, \(M \approx 0.1\)
         \item Synthetic turbulence generation (STG) used for inflow structures
-        \item Internal damping layer (IDL) used in STG development region to prevent pressure waves
+        \item Internal damping layer (IDL) used in STG development region to prevent pressure wave growth
+        \item \textcolor{red}{asdf}
         \item Domain size of \(\{27 \times 24 \times 4\} \delta_0\)
     \end{itemize}
 \end{frame}
 
-\section*{Questions?}
+\begin{frame}{High-Order Approach}
+    \begin{itemize}
+        \item Test 3 different order elements, \(Q_1, Q_2, Q_3\) tensor-product hexes
+        \item Maintain \textit{DOF resolution} (DOFs per physical length)
+        \item DOF resolution for streamwise and spanwise was \(\Delta x^+ = 30\) and \(\Delta z^+ = 12\)
+            \begin{itemize}
+                \item For \(Q_1\), this is about half the resolution required for DNS resolution
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Support and References}
+    This work was supported by....
+    \textcolor{red}{Add in sponsor support (DOE, ECP, etc)}
+\end{frame}
 
 \end{document}
 
