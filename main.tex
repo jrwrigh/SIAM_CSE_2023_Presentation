@@ -121,19 +121,24 @@
 
 
     \begin{equation*}
-        \bm{U}_{,t} + \bm{F}_{i,i}(\bm{U}) - S(\bm{U}) = 0
+        \bm{A_0}\bm{Y}_{,t} + \bm{F}_{i,i}(\bm{Y}) - S(\bm{Y}) = 0
     \end{equation*}
 
     for
 
     \begin{equation*}
-        \bm{U} =
+        \bm{A_0}
+        \underbrace{\begin{bmatrix}
+            p \\
+            u_i\\
+            T
+    \end{bmatrix}}_{\bm{Y}} =
         \begin{bmatrix}
             \rho \\
             \rho u_i\\
-            E \equiv \rho e
+            \rho e
         \end{bmatrix}, \quad
-    \bm{F}_i(\bm{U}) =
+    \bm{F}_i(\bm{Y}) =
     \underbrace{
         \begin{pmatrix}
             \rho u_i\\
@@ -144,37 +149,39 @@
         \begin{pmatrix}
         0 \\
         -  \sigma_{ij} \\
-        - \rho u_i  \sigma_{ij} - k T_{,i}
+        - \rho u_j  \sigma_{ij} - k T_{,i}
         \end{pmatrix}}_{\bm F_i^{\text{diff}}}, \quad
-    S(\bm{U}) =
+    S(\bm{Y}) =
     - \begin{pmatrix}
         0\\
         \rho \bm{g} \\
         0
     \end{pmatrix}
     \end{equation*}
-
-    \todo{convert to primitive variable formulation}
 \end{frame}
 
 \begin{frame}{Compressible Navier-Stokes for FEM}
 
-    Find \(\bm{U}\in \mathcal{S}^h\)
+    Find \(\bm{Y}\in \mathcal{S}^h\)
     \begin{equation*}
         \begin{aligned}
-            \int_{\Omega} \bm v \cdot \left( \bm{U}_{,t} - \bm{S}(\bm{U}) \right)  \,\dif \Omega
-            - \int_{\Omega} \bm{v}_{,i} \cdot \bm{F}_i(\bm{U})\, \dif\Omega & \\
-            + \int_{\partial \Omega} \bm v \cdot \bm{F}_i(\bm{U}) \cdot \widehat{\bm{n}} \,\dif \partial \Omega & \\
-            \onslide<2->{\underbrace{+ \int_{\Omega} \mathcal{P}(\bm v)^T \, \left(\bm{U}_{,t} + \bm{F}_{i,i}(\bm{U}) - S(\bm{U})
+            \int_{\Omega} \bm v \cdot \left( \bm{A_0}\bm{Y}_{,t} - \bm{S}(\bm{Y}) \right)  \,\dif \Omega
+            - \int_{\Omega} \bm{v}_{,i} \cdot \bm{F}_i(\bm{Y})\, \dif\Omega & \\
+            + \int_{\partial \Omega} \bm v \cdot \bm{F}_i(\bm{Y}) \cdot \widehat{\bm{n}}_i \,\dif \partial \Omega & \\
+            \onslide<2->{\underbrace{+ \int_{\Omega} P(\bm v)^T \, \left(\bm{A_0}\bm{Y}_{,t} + \bm{F}_{i,i}(\bm{Y}) - S(\bm{Y})
              \right) \,\dif \Omega}_{\textrm{SUPG}} &= 0 \, , \; \forall \bm v \in \mathcal{V}^h \,}
         \end{aligned}
     \end{equation*}
-
+    \vspace{-10pt}
     \onslide<3->{
         Further simplified into residual form:
         \begin{align*}
-            \mathcal{G}(\bm{U}_{,t}, \bm{U}) &=0 \\
-            \onslide<4->{\Rightarrow \quad \PartT \ElemT \BasT \Qfunc{G} \Bas \Elem \Part &= 0}
+            \mathcal{G}(\bm{Y}_{,t}, \bm{Y}) &=0 \\
+            \onslide<4->{\Rightarrow \quad \left[\PartT \ElemT \BasT \Qfunc{G} \Bas \Elem \Part \right]
+                \begin{bmatrix}
+                    \bm{Y}_{,t} \\
+                    \bm{Y}
+                \end{bmatrix} &= 0}
         \end{align*}
     }
 \end{frame}
@@ -182,18 +189,18 @@
 \begin{frame}{Implicit Timestepping}
     Implicit timestepping requires solving:
     \begin{equation*}
-        \diff{\mathcal{G}(\bm{U}_{,t}, \bm{U})}{\bm{U}} \Delta \bm{U} = \mathcal{G}(\bm{U}_{,t}, \bm{U})
+        \diff{\mathcal{G}(\bm{Y}_{,t}, \bm{Y})}{\bm{Y}} \Delta \bm{Y} = \mathcal{G}(\bm{Y}_{,t}, \bm{Y})
     \end{equation*}
     \vspace{-30pt}
     \begin{itemize}
-        \item<2-> Store \(\frac{\mathrm{d} \mathcal{G}}{\mathrm{d}\bm{U}}\)directly
+        \item<2-> Store \(\frac{\mathrm{d} \mathcal{G}}{\mathrm{d}\bm{Y}}\)directly
             \begin{itemize}
                 \item Pros: Opens up preconditioning options
                 \item Cons: Is large, expensive to store
             \end{itemize}
         \item<3-> Finite difference matrix-free approximation:
             \begin{equation*}
-                \diff{\mathcal{G}(\bm{U}_{,t}, \bm{U})}{\bm{U}} \Delta \bm{U} \approx \frac{\mathcal{G}(\bm{U}_{,t}, \bm{U} + \epsilon \Delta \bm{U}) - \mathcal{G}(\bm{U}_{,t}, \bm{U})} {\epsilon}
+                \diff{\mathcal{G}(\bm{Y}_{,t}, \bm{Y})}{\bm{Y}} \Delta \bm{Y} \approx \frac{\mathcal{G}(\bm{Y}_{,t}, \bm{Y} + \epsilon \Delta \bm{Y}) - \mathcal{G}(\bm{Y}_{,t}, \bm{Y})} {\epsilon}
             \end{equation*}
             \vspace{-20pt}
             \begin{itemize}
@@ -205,16 +212,16 @@
 
 \begin{frame}{Exact Matrix-Free Jacobian}
     \begin{align*}
-        \onslide<+->{\diff{\mathcal{G}}{\bm{U}} \Delta \bm{U} &= \diff{}{\bm{U}} \left[\mathcal{G}(\bm{U}_{,t}, \bm{U})\right] \Delta \bm{U} \\}
-        \onslide<+->{ &= \diff{}{\bm{U}} \left[ \PartT \ElemT \BasT \Qfunc{G} \Bas \Elem \Part \right] \Delta \bm{U} \\}
-        \onslide<+->{ &= \left[ \PartT \ElemT \BasT \diff{\Qfunc{G}}{\bm{U}}  \Bas \Elem \Part \right]\Delta \bm{U} \\}
+        \onslide<+->{\diff{\mathcal{G}}{\bm{Y}} \Delta \bm{Y} &= \diff{}{\bm{Y}} \left[\mathcal{G}(\bm{Y}_{,t}, \bm{Y})\right] \Delta \bm{Y} \\}
+        \onslide<+->{ &= \diff{}{\bm{Y}} \left[ \PartT \ElemT \BasT \Qfunc{G} \Bas \Elem \Part \right] \Delta \bm{Y} \\}
+        \onslide<+->{ &= \left[ \PartT \ElemT \BasT \diff{\Qfunc{G}}{\bm{Y}}  \Bas \Elem \Part \right]\Delta \bm{Y} \\}
     \end{align*}
     \vspace{-50pt}
     \onslide<+->{
     \begin{itemize}
         \item Store intermediary data at quadrature points to improve efficiency ("taping")
             \begin{itemize}
-                \item We store \(\bm{U}\), viscous stress, and stabilization perturbation (\(\mathcal{P}(\bm{v})\))
+                \item We store \(\bm{Y}\), viscous stress, and stabilization perturbation (\(P(\bm{v})\))
             \end{itemize}
         \item Pros: Exact Jacobian matrix-vector product (potentially faster convergence)
         \item Cons: More expensive than residual evaluation (but not by too much)
@@ -234,15 +241,15 @@
         \item<+-> libCEED Operator based on user-implemented \texttt{CeedQFunction}s (\(\DQfunc\))
             \begin{itemize}
                 \item Use different \texttt{CeedQFunction}s for volume vs boundary integrals
-                \item Combined into a single \texttt{CeedOperator} to represent \(\mathcal{G}(\bm{U}_{,t}, \bm{U})\)
+                \item Combined into a single \texttt{CeedOperator} to represent \(\mathcal{G}(\bm{Y}_{,t}, \bm{Y})\)
             \end{itemize}
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Time Step Loop}
     \begin{enumerate}
-        \item<+-> PETSc gets \(\bm{U}^L = \Part \bm{U}^G\) from current solution
-        \item<+-> PETSc calls libCEED to get \(\bm{G}^L = \underbrace{\ElemT \BasT \DQfunc \Bas \Elem}_L \bm{U}^L\)
+        \item<+-> PETSc gets \(\bm{Y}^L = \Part \bm{Y}^G\) from current solution
+        \item<+-> PETSc calls libCEED to get \(\bm{G}^L = \underbrace{\ElemT \BasT \DQfunc \Bas \Elem}_L \bm{Y}^L\)
         \item<+-> PETSc gets \(\bm{G}^G = \PartT \bm{G}^L\)
         \item<+-> PETSc uses \(\bm{G}^G\) to compute new solution value \onslide<+->{...or whatever else it wants}
     \end{enumerate}
@@ -441,3 +448,69 @@
 %
 %     \end{columns}
 % \end{frame}
+
+% ---- Conservative Variable Formulation Slides: ---
+
+% \begin{frame}{Compressible Navier-Stokes}
+%
+%
+%     \begin{equation*}
+%         \bm{U}_{,t} + \bm{F}_{i,i}(\bm{U}) - S(\bm{U}) = 0
+%     \end{equation*}
+%
+%     for
+%
+%     \begin{equation*}
+%         \bm{U} =
+%         \begin{bmatrix}
+%             \rho \\
+%             \rho u_i\\
+%             E \equiv \rho e
+%         \end{bmatrix}, \quad
+%     \bm{F}_i(\bm{U}) =
+%     \underbrace{
+%         \begin{pmatrix}
+%             \rho u_i\\
+%             \rho u_i u_j + p \delta_{ij} \\
+%             (\rho e + p)u_i
+%         \end{pmatrix}}_{\bm F_i^{\text{adv}}} +
+%     \underbrace{
+%         \begin{pmatrix}
+%         0 \\
+%         -  \sigma_{ij} \\
+%         - \rho u_j  \sigma_{ij} - k T_{,i}
+%         \end{pmatrix}}_{\bm F_i^{\text{diff}}}, \quad
+%     S(\bm{U}) =
+%     - \begin{pmatrix}
+%         0\\
+%         \rho \bm{g} \\
+%         0
+%     \end{pmatrix}
+%     \end{equation*}
+%
+%     \todo{convert to primitive variable formulation}
+% \end{frame}
+%
+% \begin{frame}{Compressible Navier-Stokes for FEM}
+%
+%     Find \(\bm{U}\in \mathcal{S}^h\)
+%     \begin{equation*}
+%         \begin{aligned}
+%             \int_{\Omega} \bm v \cdot \left( \bm{U}_{,t} - \bm{S}(\bm{U}) \right)  \,\dif \Omega
+%             - \int_{\Omega} \bm{v}_{,i} \cdot \bm{F}_i(\bm{U})\, \dif\Omega & \\
+%             + \int_{\partial \Omega} \bm v \cdot \bm{F}_i(\bm{U}) \cdot \widehat{\bm{n}}_i \,\dif \partial \Omega & \\
+%             \onslide<2->{\underbrace{+ \int_{\Omega} \mathcal{P}(\bm v)^T \, \left(\bm{U}_{,t} + \bm{F}_{i,i}(\bm{U}) - S(\bm{U})
+%              \right) \,\dif \Omega}_{\textrm{SUPG}} &= 0 \, , \; \forall \bm v \in \mathcal{V}^h \,}
+%         \end{aligned}
+%     \end{equation*}
+%
+%     \onslide<3->{
+%         Further simplified into residual form:
+%         \begin{align*}
+%             \mathcal{G}(\bm{U}_{,t}, \bm{U}) &=0 \\
+%             \onslide<4->{\Rightarrow \quad \PartT \ElemT \BasT \Qfunc{G} \Bas \Elem \Part &= 0}
+%         \end{align*}
+%     }
+% \end{frame}
+
+% ---- END Conservative Variable Formulation Slides: ---
