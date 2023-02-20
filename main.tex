@@ -210,22 +210,49 @@
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Exact Matrix-Free Jacobian}
-    \begin{align*}
-        \onslide<+->{\diff{\mathcal{G}}{\bm{Y}} \Delta \bm{Y} &= \diff{}{\bm{Y}} \left[\mathcal{G}(\bm{Y}_{,t}, \bm{Y})\right] \Delta \bm{Y} \\}
-        \onslide<+->{ &= \diff{}{\bm{Y}} \left[ \PartT \ElemT \BasT \Qfunc{G} \Bas \Elem \Part \right] \Delta \bm{Y} \\}
-        \onslide<+->{ &= \left[ \PartT \ElemT \BasT \diff{\Qfunc{G}}{\bm{Y}}  \Bas \Elem \Part \right]\Delta \bm{Y} \\}
-    \end{align*}
-    \vspace{-50pt}
-    \onslide<+->{
-    \begin{itemize}
-        \item Store intermediary data at quadrature points to improve efficiency ("taping")
+\begin{frame}{Exact Matrix-Free Jacobian via CeedOperator}
+    \begin{columns}
+        \column{0.45\textwidth}
+        \onslide<1->{
+            \begin{align*}
+                \diff{\mathcal{G}}{\bm{Y}} \Delta \bm{Y} &= \diff{}{\bm{Y}} \left[ \PartT \ElemT \BasT \Qfunc{G} \Bas \Elem \Part \right] \Delta \bm{Y} \\
+                &= \left[ \PartT \ElemT \BasT \diff{\Qfunc{G}}{\bm{Y}}  \Bas \Elem \Part \right]\Delta \bm{Y} \\
+            \end{align*}
+        }
+        \column{0.5\textwidth}
+        \onslide<2->{
+            \begin{center}
+                \begin{tikzpicture}
+                    \node [
+                    above right,
+                    inner sep=0] (image) at (0,0) {\includegraphics[width=1\textwidth]{img/op_jacobian.pdf}};
+
+                    % Create scope with normalized axes
+                    \begin{scope}[
+                        x={($0.1*(image.south east)$)},
+                        y={($0.1*(image.north west)$)}]
+
+                        % % Grid
+                        %     \draw[lightgray,step=1] (image.south west) grid (image.north east);
+                        %
+                        % % Axes' labels
+                        %     \foreach \x in {0,1,...,10} { \node [below] at (\x,0) {\x}; }
+                        %     \foreach \y in {0,1,...,10} { \node [left] at (0,\y) {\y};}
+
+                        \invisible<3->{\draw[ultra thin,white,fill=white] (6.7, 0) rectangle (0, 10);}
+                    \end{scope}
+                \end{tikzpicture}
+            \end{center}
+        }
+    \end{columns}
+    \onslide<4->{
+        \begin{itemize}
+            \item \textbf{Pros:} Exact Jacobian matrix-vector product (potentially faster convergence)
+            \item \textbf{Cons:} More expensive than residual evaluation (but not by too much)
             \begin{itemize}
-                \item We store \(\bm{Y}\), viscous stress, and stabilization perturbation (\(P(\bm{v})\))
+                \item Still faster than just \textit{applying} sparse \(\frac{\mathrm{d} \mathcal{G}}{\mathrm{d}\bm{Y}}\)
             \end{itemize}
-        \item Pros: Exact Jacobian matrix-vector product (potentially faster convergence)
-        \item Cons: More expensive than residual evaluation (but not by too much)
-    \end{itemize}
+        \end{itemize}
     }
 \end{frame}
 
