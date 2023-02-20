@@ -256,32 +256,6 @@
     }
 \end{frame}
 
-\begin{frame}{Code Architecture}
-    \begin{itemize}
-        \item<+-> PETSc used for handling everything libCEED doesn't
-            \begin{itemize}
-                \item \(\Part, \PartT\) (Partition global-to-local operations)
-                \item Time integration, linear, non-linear equation solving
-                \item Strong boundary conditions
-            \end{itemize}
-        \item<+-> PETSc calls a libCEED operator when it needs the residual evaluation
-        \item<+-> libCEED Operator based on user-implemented \texttt{CeedQFunction}s (\(\DQfunc\))
-            \begin{itemize}
-                \item Use different \texttt{CeedQFunction}s for volume vs boundary integrals
-                \item Combined into a single \texttt{CeedOperator} to represent \(\mathcal{G}(\bm{Y}_{,t}, \bm{Y})\)
-            \end{itemize}
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{Time Step Loop}
-    \begin{enumerate}
-        \item<+-> PETSc gets \(\bm{Y}^L = \Part \bm{Y}^G\) from current solution
-        \item<+-> PETSc calls libCEED to get \(\bm{G}^L = \underbrace{\ElemT \BasT \DQfunc \Bas \Elem}_L \bm{Y}^L\)
-        \item<+-> PETSc gets \(\bm{G}^G = \PartT \bm{G}^L\)
-        \item<+-> PETSc uses \(\bm{G}^G\) to compute new solution value \onslide<+->{...or whatever else it wants}
-    \end{enumerate}
-\end{frame}
-
 \section{Accuracy and Performance of High-Order Scale-Resolving Simulations}
 
 \begin{frame}{Flat Plate Boundary Layer, Zero Pressure Gradient}
