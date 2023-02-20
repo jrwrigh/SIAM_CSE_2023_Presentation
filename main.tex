@@ -68,7 +68,7 @@
     \begin{itemize}
         \item<+-> C library for element-based discretizations
             \begin{itemize}
-                \item<+-> Bindings for Fortran, Rust, Python, and Julia available
+                \item<+-> Bindings available for Fortran, Rust, Python, and Julia
             \end{itemize}
         \item<+-> Designed for matrix-free operator evaluation
         \item<+-> Portable to different hardware via computational backends
@@ -76,7 +76,7 @@
                 \item<+-> Code that runs on CPU also runs on GPU without changes
                 \item<+-> Computational backend selectable at runtime, using runtime compilation
             \end{itemize}
-        \item<+-> Geared toward high-order element discretizations
+        \item<+-> Geared toward high-order finite element discretizations
     \end{itemize}
 
 \end{frame}
@@ -160,24 +160,24 @@
     \end{equation*}
 \end{frame}
 
-\begin{frame}{Compressible Navier-Stokes for FEM}
+\begin{frame}{Compressible Navier-Stokes for Continuous-Galerkin FEM}
 
-    Find \(\bm{Y}\in \mathcal{S}^h\)
+    Find \(\bm{Y}\in \mathcal{S}^h \, , \; \forall \bm v \in \mathcal{V}^h\)
     \begin{equation*}
         \begin{aligned}
             \int_{\Omega} \bm v \cdot \left( \bm{A_0}\bm{Y}_{,t} - \bm{S}(\bm{Y}) \right)  \,\dif \Omega
-            - \int_{\Omega} \bm{v}_{,i} \cdot \bm{F}_i(\bm{Y})\, \dif\Omega & \\
+            - \int_{\Omega} \bm{v}_{,i} \cdot \bm{F}_i(\bm{Y})\, \dif\Omega
             + \int_{\partial \Omega} \bm v \cdot \bm{F}_i(\bm{Y}) \cdot \widehat{\bm{n}}_i \,\dif \partial \Omega & \\
             \onslide<2->{\underbrace{+ \int_{\Omega} P(\bm v)^T \, \left(\bm{A_0}\bm{Y}_{,t} + \bm{F}_{i,i}(\bm{Y}) - S(\bm{Y})
-             \right) \,\dif \Omega}_{\textrm{SUPG}} &= 0 \, , \; \forall \bm v \in \mathcal{V}^h \,}
+            \right) \,\dif \Omega}_{\textrm{SUPG}} &= 0}
         \end{aligned}
     \end{equation*}
     \vspace{-10pt}
     \onslide<3->{
-        Further simplified into residual form:
+        Simplify into residual form:
         \begin{align*}
             \mathcal{G}(\bm{Y}_{,t}, \bm{Y}) &=0 \\
-            \onslide<4->{\Rightarrow \quad \left[\PartT \ElemT \BasT \Qfunc{G} \Bas \Elem \Part \right]
+            \onslide<4->{\Rightarrow \quad \PartT \ElemT \BasT \Qfunc{G} \Bas \Elem \Part
                 \begin{bmatrix}
                     \bm{Y}_{,t} \\
                     \bm{Y}
@@ -193,10 +193,10 @@
     \end{equation*}
     \vspace{-30pt}
     \begin{itemize}
-        \item<2-> Store \(\frac{\mathrm{d} \mathcal{G}}{\mathrm{d}\bm{Y}}\)directly
+        \item<2-> Store \(\frac{\mathrm{d} \mathcal{G}}{\mathrm{d}\bm{Y}}\) directly (sparse matrix representation)
             \begin{itemize}
-                \item Pros: Opens up preconditioning options
-                \item Cons: Is large, expensive to store
+                \item \textbf{Pros:} Opens up preconditioning options
+                \item \textbf{Cons:} Is large, expensive to store
             \end{itemize}
         \item<3-> Finite difference matrix-free approximation:
             \begin{equation*}
@@ -204,8 +204,8 @@
             \end{equation*}
             \vspace{-20pt}
             \begin{itemize}
-                \item Pros: Just need a residual evaluation, cheap (in programming and computation)
-                \item Cons: Approximation, accuracy limited to \(\sqrt{\epsilon_{\text{machine}}}\)
+                \item \textbf{Pros:} Just need a residual evaluation, cheap (in programming and computation)
+                \item \textbf{Cons:} Approximation, accuracy limited to \(\sqrt{\epsilon_{\text{machine}}}\)
             \end{itemize}
     \end{itemize}
 \end{frame}
