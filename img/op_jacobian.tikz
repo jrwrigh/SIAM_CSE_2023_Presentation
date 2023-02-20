@@ -1,0 +1,19 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=pll-gram, fill={green!20}] (5) at (-6, 0) {\texttt{op\_residual}};
+		\node [style=ellipse, fill={blue!20}] (6) at (-6, 2) {$\bm{Y}_{,t},\, \bm{Y}$};
+		\node [style=ellipse, fill={red!20}] (7) at (-6, -2) {$\mathcal{G}(\bm{Y}_{,t}, \bm{Y})$};
+		\node [style=pll-gram, fill={orange!20}] (10) at (6, 0) {\texttt{op\_jacobian}};
+		\node [style=ellipse, fill={blue!20}] (11) at (6, 2) {$\Delta\bm{Y}$};
+		\node [style=ellipse, fill={red!20}] (12) at (6, -2) {$\diff{\mathcal{G}}{\bm{Y}} \Delta \bm{Y}$};
+		\node [style=rounded box, label={below:\footnotesize \textit{store at quad points}}, label={above:\footnotesize \textit{intermediate data}}, fill={violet!20}] (16) at (0, 0) {$\bm{Y},\,\sigma_{ij}, P(\bm{v})^T$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=Arrow] (5) to (16);
+		\draw [style=Arrow] (16) to (10);
+		\draw [style=Arrow] (5) to (7);
+		\draw [style=Arrow] (6) to (5);
+		\draw [style=Arrow] (11) to (10);
+		\draw [style=Arrow] (10) to (12);
+	\end{pgfonlayer}
+\end{tikzpicture}
