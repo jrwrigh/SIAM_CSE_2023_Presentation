@@ -258,6 +258,86 @@
 
 \section{Accuracy and Performance of High-Order Scale-Resolving Simulations}
 
+\begin{frame}{Viscous Outflow Boundary Conditions}
+    \begin{itemize}
+        \item<2-> Riemann Flux BCs everywhere is ideal
+            % \begin{itemize}
+                \item<3-> Velocity not known \textit{a priori} \(\longrightarrow\) traditional Riemann BCs not applicable
+                \item<4-> Weak-pressure prescription ill-posed for recirculation
+            % \end{itemize}
+        % \item<5-> Solution: Calculate \(\bm{F}_i^{\text{adv}}\) via Riemann solver, calculate \(\bm{F}_i^{\text{diff}}\) from solution
+        %     \begin{itemize}
+        %         \item<5-> Handles recirculation without issue, velocity need not be set
+        %     \end{itemize}
+    \end{itemize}
+    \begin{block}{Solution}<5->
+        Calculate \(\bm{F}_i^{\text{adv}}\) via Riemann solver, calculate \(\bm{F}_i^{\text{diff}}\) from solution
+        \vspace{-10pt}
+        \begin{itemize}
+            \item Handles recirculation without issue, velocity need not be set
+        \end{itemize}
+    \end{block}
+        \vspace{-15pt}
+    \begin{columns}
+        \column{0.5\textwidth}
+    \onslide<2->{\begin{figure}
+        \begin{tikzpicture}
+                \node [
+                above right,
+                inner sep=0] (image) at (0,0) {\includegraphics[width=0.35\textwidth]{img/RiemannFreestream.pdf}};
+
+            % Create scope with normalized axes
+            \begin{scope}[
+                x={($0.1*(image.south east)$)},
+                y={($0.1*(image.north west)$)}]
+
+                % % Grid
+                %     \draw[lightgray,step=1] (image.south west) grid (image.north east);
+                %
+                % % Axes' labels
+                %     \foreach \x in {0,1,...,10} { \node [below] at (\x,0) {\x}; }
+                %     \foreach \y in {0,1,...,10} { \node [left] at (0,\y) {\y};}
+
+                \onslide<6->{\draw[red] (0, 4.5) rectangle (10, 2.5);}
+            \end{scope}
+        \end{tikzpicture}
+        \vspace{-10pt}
+        \caption{\tiny Riemann Flux}
+\end{figure}}
+    \column{0.5\textwidth}
+    \onslide<4>{
+        \begin{tikzpicture}[remember picture,overlay]
+            \node[above left, xshift=-0cm,yshift=1cm] (image) at (current page.south east) {\includegraphics[width=8cm]{img/FlatPlateRecirculation.png}};
+        \end{tikzpicture}
+    }
+    \onslide<5->{ \begin{figure}
+        \begin{tikzpicture}
+                \node [
+                above right,
+                inner sep=0] (image) at (0,0) {\includegraphics[width=0.37\textwidth]{img/RiemannOutflow.pdf}};
+
+            % Create scope with normalized axes
+            \begin{scope}[
+                x={($0.1*(image.south east)$)},
+                y={($0.1*(image.north west)$)}]
+
+                % % Grid
+                %     \draw[lightgray,step=1] (image.south west) grid (image.north east);
+                %
+                % % Axes' labels
+                %     \foreach \x in {0,1,...,10} { \node [below] at (\x,0) {\x}; }
+                %     \foreach \y in {0,1,...,10} { \node [left] at (0,\y) {\y};}
+
+                \onslide<6->{\draw[red] (0, 4.3) rectangle (9.2, 2.3);}
+            \end{scope}
+        \end{tikzpicture}
+        \vspace{-10pt}
+        \caption{\tiny Riemann Outflow Boundary Condition Flux}
+    \end{figure}
+            }
+    \end{columns}
+\end{frame}
+
 \begin{frame}{Flat Plate Boundary Layer, Zero Pressure Gradient}
     Problem Description:
     \begin{itemize}

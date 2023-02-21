@@ -10,6 +10,8 @@
 \tikzstyle{pll-gram}=[fill=white, draw=black, shape=trapezium, trapezium left angle=120, trapezium right angle=60]
 \tikzstyle{circle}=[fill=white, draw=black, shape=circle, minimum width=0.75cm, minimum height=1cm]
 \tikzstyle{ellipse}=[fill=white, draw=black, shape=ellipse, inner sep=1pt]
+\tikzstyle{Arrow}=[-stealth]
+\tikzstyle{testarrow}=[-stealth]
 
 % Edge styles
-\tikzstyle{Arrow}=[-stealth]
+\tikzstyle{ThickDash}=[-, dashed, line width=0.6pt]
