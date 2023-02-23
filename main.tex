@@ -14,6 +14,7 @@
 \presetkeys{todonotes}{inline}{}
 
 \usepackage{esdiff}
+\usepackage[scr=boondoxo]{mathalpha} % Get better script L
 \usepackage{minted}
 
 \newminted{c}{fontsize=\tiny,
@@ -65,8 +66,8 @@
 % [ ] Add references and thanks to support
 % [ ] Mention Solids performance in libCEED intro (gives better motivation)
 % [ ] (Possibly) remove references to recirculation from BC discussion (check with Ken and Jed)
-% [ ] Cleanup performance bar graph (get Q_1 results for same size problem, change label names)
-% [ ] Slide 5: Fix up the overlay order with the "Simplify into residual form"
+% [-] Cleanup performance bar graph (get Q_1 results for same size problem, change label names)
+% [-] Slide 5: Fix up the overlay order with the "Simplify into residual form"
 
 \section{libCEED Overview}
 
@@ -170,24 +171,24 @@
     Find \(\bm{Y}\in \mathcal{S}^h \, , \; \forall \bm v \in \mathcal{V}^h\)
     \begin{equation*}
         \begin{aligned}
-            \only<-1>{\quad\ \ \,}\int_{\Omega} \bm v \cdot \left( \bm{A_0}\bm{Y}_{,t} - \bm{S}(\bm{Y}) \right)  \,\dif \Omega
-            \only<-1>{
+            \only<-+>{\quad\ \ \,}\int_{\Omega} \bm v \cdot \left( \bm{A_0}\bm{Y}_{,t} - \bm{S}(\bm{Y}) \right)  \,\dif \Omega
+            \only<-.>{
                 + \int_{\Omega} \bm{v} \cdot \bm{F}_{i,i}(\bm{Y})\, \dif\Omega
             }
-            \uncover<2->{
+            \uncover<+->{
                 - \int_{\Omega} \bm{v}_{,i} \cdot \bm{F}_i(\bm{Y})\, \dif\Omega
                 + \int_{\partial \Omega} \bm v \cdot \bm{F}_i(\bm{Y}) \cdot \widehat{\bm{n}}_i \,\dif \partial \Omega & \\
             }
-            \onslide<3->{\underbrace{+ \int_{\Omega} P(\bm v)^T \, \left(\bm{A_0}\bm{Y}_{,t} + \bm{F}_{i,i}(\bm{Y}) - S(\bm{Y})
+            \onslide<+->{\underbrace{+ \int_{\Omega} \mathscr{L}(\bm v) \, \left(\bm{A_0}\bm{Y}_{,t} + \bm{F}_{i,i}(\bm{Y}) - S(\bm{Y})
             \right) \,\dif \Omega}_{\textrm{SUPG}} &= 0}
         \end{aligned}
     \end{equation*}
     \vspace{-10pt}
-    \onslide<3->{
+    \onslide<+->{
         Simplify into residual form:
         \begin{align*}
             \mathcal{G}(\bm{Y}_{,t}, \bm{Y}) &=0 \\
-            \onslide<4->{\Rightarrow \quad \PartT \ElemT \BasT \Qfunc{G} \Bas \Elem \Part
+            \onslide<+->{\Rightarrow \quad \PartT \ElemT \BasT \Qfunc{G} \Bas \Elem \Part
                 \begin{bmatrix}
                     \bm{Y}_{,t} \\
                     \bm{Y}
@@ -320,7 +321,6 @@
         \column{0.45\textwidth}
         \onslide<1->{
             \begin{align*}
-                % \diff{\mathcal{G}}{\bm{Y}} \Delta \bm{Y} &= \diff{}{\bm{Y}} \left[ \PartT \ElemT \BasT \Qfunc{G} \Bas \Elem \Part \right] \Delta \bm{Y} \\
                 \diff{\mathcal{G}}{\bm{Y}} \Delta \bm{Y} &= \diff{}{\bm{Y}} \overbrace{\left[ \PartT \ElemT \BasT \Qfunc{G} \Bas \Elem \Part \right]}^{\mathcal G(\bm{Y}_{,t}, \bm{Y})} \Delta \bm{Y} \\
                 &= \left[ \PartT \ElemT \BasT \diff{\Qfunc{G}}{\bm{Y}}  \Bas \Elem \Part \right]\Delta \bm{Y} \\
             \end{align*}

@@ -2,5 +2,6 @@
 \usepackage{bm}
 \usepackage[T1]{fontenc}
 \usepackage{esdiff}
+\usepackage[scr=boondoxo]{mathalpha}
 
 \usetikzlibrary {decorations.pathreplacing}
