@@ -27,6 +27,7 @@ EVENTS = {
     'PCSetUp',
     'PCApply',
     'MatMult',
+    'MatSetValuesCOO',
 }
 
 def parse_file_content(filename):
@@ -85,7 +86,7 @@ paths = {
     # 'Q3_A': Path("../../data/36-90_p3_ROPI/compFlatPlate.o371808"),
     # 'Q3_B': Path("../../data/36-90_p3_ROPI/compFlatPlate.o386583"),
 
-    'Q1': Path("../../data/12-30_p1_ROPI/compFlatPlate.o386591"),
+    'Q1': Path("../../data/8partP1/statsTestPer52.log"),
     'Q2': Path("../../data/8partP2/compFlatPlate.o371600"),
     'Q3': Path("../../data/8partP3/GPUAM_NoMAGMA_GLog.log"),
 }
@@ -99,19 +100,25 @@ datadf = pd.DataFrame.from_records(data)
 
 #%% Plot stuff
 
-plot_events = ['SNESFunctionEval', 'SNESJacobianEval', 'PCSetUp', 'PCApply', 'MatMult']
-plot_events = [event + ' t/s' for event in plot_events]
+event_label_dict = {
+    'SNESFunctionEval': r"$\mathcal{G} (\mathbf{Y}_{,t}, \mathbf{Y})$",
+    'SNESJacobianEval': r"$\mathrm{d}\mathcal{G} / \mathrm{d} \mathbf{Y}$ Setup",
+    'PCSetUp': "PreCond Setup",
+    'PCApply': "PreCond Apply",
+    'MatMult':  r"$\mathrm{d}\mathcal{G} / \mathrm{d} \mathbf{Y} \ \Delta \mathbf{Y}$ "}
+for key in list(event_label_dict.keys()):
+    event_label_dict[key + ' t/s'] = event_label_dict.pop(key)
 
-plot_kwargs = {'width': 0.5}
+generic_plot_kwargs = {'width': 0.5}
 
 plot_data = {}
 bottom = np.zeros(3)
 
-for event in plot_events:
+for event in event_label_dict.keys():
     plot_data[event] = {}
     plot_data[event]['height'] = datadf.loc[event].to_numpy().astype(float)
     plot_data[event]['bottom'] = np.copy(bottom)
-    plot_data[event]['label'] = event.split()[0]
+    plot_data[event]['label'] = event_label_dict[event]
     bottom += plot_data[event]['height']
 
 other_data = {}
@@ -119,17 +126,16 @@ other_data['Misc.'] = {}
 other_data['Misc.']['height'] = datadf.loc['TSStep t/s'].to_numpy().astype(float) - bottom
 other_data['Misc.']['bottom'] = np.copy(bottom)
 other_data['Misc.']['label'] = "Misc."
-# other_data.update(plot_data)
 plot_data.update(other_data)
 
 
-labels = [r'$Q_1$', r'$Q_2$', r'$Q_3$']
+xaxis_labels = [r'$Q_1$', r'$Q_2$', r'$Q_3$']
 fig, ax = plt.subplots()
 
 bar_labels = ['{:.2f}'.format(num) for num in datadf.loc['TSStep t/s'].to_numpy().astype(float)]
 
 for key, plot_kwarg in plot_data.items():
-    p = ax.bar(labels, **plot_kwarg, **plot_kwargs)
+    p = ax.bar(xaxis_labels, **plot_kwarg, **generic_plot_kwargs)
 
     if key == 'Misc.':
         ax.bar_label(p, bar_labels)
@@ -137,3 +143,4 @@ for key, plot_kwarg in plot_data.items():
 ax.set_ylabel('Time per Step (s)')
 ax.legend()
 ax.grid(False)
+plt.tight_layout()
