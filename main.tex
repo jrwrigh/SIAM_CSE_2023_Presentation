@@ -61,27 +61,25 @@
 
 \cutoc
 
-\section{What is libCEED?}
+\section{libCEED Overview}
 
 \begin{frame}{What is libCEED?}
 
     \begin{itemize}
         \item<+-> C library for element-based discretizations
             \begin{itemize}
-                \item<+-> Bindings available for Fortran, Rust, Python, and Julia
+                \item Bindings available for Fortran, Rust, Python, and Julia
             \end{itemize}
         \item<+-> Designed for matrix-free operator evaluation
         \item<+-> Portable to different hardware via computational backends
             \begin{itemize}
-                \item<+-> Code that runs on CPU also runs on GPU without changes
-                \item<+-> Computational backend selectable at runtime, using runtime compilation
+                \item Code that runs on CPU also runs on GPU without changes
+                \item Computational backend selectable at runtime, using runtime compilation
             \end{itemize}
         \item<+-> Geared toward high-order finite element discretizations
     \end{itemize}
 
 \end{frame}
-
-\section{libCEED Overview}
 
 \begin{frame}{Finite Element Operator Decomposition}
     \begin{tikzpicture}
@@ -115,7 +113,7 @@
 
 \end{frame}
 
-\section{Fluid Simulations with libCEED}
+\section{Compressible Fluid Equations in libCEED}
 
 \begin{frame}{Compressible Navier-Stokes}
 
@@ -185,6 +183,101 @@
         \end{align*}
     }
 \end{frame}
+
+\section{Viscous Outflow Boundary Conditions}
+
+\begin{frame}{Viscous Outflow Boundary Conditions}
+    \begin{itemize}
+        \item<2-> Riemann Flux BCs everywhere is ideal
+        \item<3-> Velocity not known \textit{a priori} \(\longrightarrow\) traditional Riemann BCs not applicable
+        \item<4-> Weak-pressure prescription ill-posed for recirculation
+    \end{itemize}
+    \begin{block}{Solution}<5->
+        \vspace{-5pt}
+        \begin{itemize}
+            \item<5-> Calculate \(\bm{F}_i^{\text{adv}}\) via Riemann solver, setting \(u_i^{\text{ext}} = u_i^{\text{int}}\) 
+            \item<7-> Calculate \(\bm{F}_i^{\text{diff}}\) from solution, then \(\bm{F}_i = \bm{F}_i^{\text{adv}} + \bm{F}_i^{\text{diff}}\)
+        \end{itemize}
+    \end{block}
+        \vspace{-15pt}
+    \begin{columns}
+        \column{0.5\textwidth}
+    \onslide<2->{ \begin{figure}
+        \begin{tikzpicture}
+                \node [
+                above right,
+                inner sep=0] (image) at (0,0) {\includegraphics[width=0.43\textwidth]{img/RiemannFreestream.pdf}};
+
+            % Create scope with normalized axes
+            \begin{scope}[
+                x={($0.1*(image.south east)$)},
+                y={($0.1*(image.north west)$)}]
+
+                % % Grid
+                %     \draw[lightgray,step=1] (image.south west) grid (image.north east);
+                %
+                % % Axes' labels
+                %     \foreach \x in {0,1,...,10} { \node [below] at (\x,0) {\x}; }
+                %     \foreach \y in {0,1,...,10} { \node [left] at (0,\y) {\y};}
+
+                \onslide<6->{\draw[red, thick] (0, 4.3) rectangle (8, 2.3);}
+            \end{scope}
+        \end{tikzpicture}
+        \vspace{-10pt}
+        \caption{\tiny Riemann Flux}
+    \end{figure} }
+    \column{0.5\textwidth}
+    \onslide<4>{
+        \begin{tikzpicture}[remember picture,overlay]
+            \node[above left, xshift=-0cm,yshift=1cm] (image) at (current page.south east) {\includegraphics[width=8cm]{img/FlatPlateRecirculation.png}};
+        \end{tikzpicture}
+    }
+    \onslide<5->{ \begin{figure}
+        \begin{tikzpicture}
+                \node [
+                above right,
+                inner sep=0] (image) at (0,0) {\includegraphics[width=0.37\textwidth]{img/RiemannOutflow.pdf}};
+
+            % Create scope with normalized axes
+            \begin{scope}[
+                x={($0.1*(image.south east)$)},
+                y={($0.1*(image.north west)$)}]
+
+                % % Grid
+                %     \draw[lightgray,step=1] (image.south west) grid (image.north east);
+                %
+                % % Axes' labels
+                %     \foreach \x in {0,1,...,10} { \node [below] at (\x,0) {\x}; }
+                %     \foreach \y in {0,1,...,10} { \node [left] at (0,\y) {\y};}
+
+                \onslide<6->{\draw[red, thick] (0, 4.3) rectangle (9.2, 2.3);}
+            \end{scope}
+        \end{tikzpicture}
+        \vspace{-10pt}
+        \caption{\tiny Riemann Outflow Boundary Condition Flux}
+    \end{figure} }
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Viscous Outflow Boundary Conditions Demonstration}
+    \begin{columns}
+        \column{0.45\textwidth}
+        \begin{figure}
+            \begin{center}
+                \includegraphics[width=0.95\textwidth]{img/CylinderCrossflowRecirc.png}
+            \end{center}
+        \end{figure}
+
+        \column{0.5\textwidth}
+            \begin{itemize}
+                \item Cylinder in cross flow torture test
+                \item Stable for significant outflow recirculation
+                \item Only \(p\) and \(T\) set at boundary
+            \end{itemize}
+    \end{columns}
+\end{frame}
+
+\section{Efficient Implicit Timestepping}
 
 \begin{frame}{Implicit Timestepping}
     Implicit timestepping requires solving:
@@ -256,117 +349,75 @@
     }
 \end{frame}
 
-\section{Accuracy and Performance of High-Order Scale-Resolving Simulations}
-
-\begin{frame}{Viscous Outflow Boundary Conditions}
-    \begin{itemize}
-        \item<2-> Riemann Flux BCs everywhere is ideal
-            % \begin{itemize}
-                \item<3-> Velocity not known \textit{a priori} \(\longrightarrow\) traditional Riemann BCs not applicable
-                \item<4-> Weak-pressure prescription ill-posed for recirculation
-            % \end{itemize}
-        % \item<5-> Solution: Calculate \(\bm{F}_i^{\text{adv}}\) via Riemann solver, calculate \(\bm{F}_i^{\text{diff}}\) from solution
-        %     \begin{itemize}
-        %         \item<5-> Handles recirculation without issue, velocity need not be set
-        %     \end{itemize}
-    \end{itemize}
-    \begin{block}{Solution}<5->
-        Calculate \(\bm{F}_i^{\text{adv}}\) via Riemann solver, calculate \(\bm{F}_i^{\text{diff}}\) from solution
-        \vspace{-10pt}
-        \begin{itemize}
-            \item Handles recirculation without issue, velocity need not be set
-        \end{itemize}
-    \end{block}
-        \vspace{-15pt}
+\begin{frame}{Performance Exact Matrix-Free Jacobian via CeedOperator}
     \begin{columns}
         \column{0.5\textwidth}
-    \onslide<2->{\begin{figure}
-        \begin{tikzpicture}
-                \node [
-                above right,
-                inner sep=0] (image) at (0,0) {\includegraphics[width=0.35\textwidth]{img/RiemannFreestream.pdf}};
+        \onslide<+->{
+            \begin{figure}
+                \centering
+                \includegraphics[width=0.95\textwidth]{img/OpAppEfficiency_PerfPortSolidsFig7.png}
+                \vspace{-10pt}
+                \caption{\tiny Matrix-Free Application Comparison (Reproduced from Brown \textit{et al.} 2022). Not from fluids code, but representative of libCEED matrix-free}
+                % Run on LLNL Lassen, 4xV100 GPUs. aijcusparse results in narrow DoFs range due to memory contraints.
+            \end{figure}
+        }
 
-            % Create scope with normalized axes
-            \begin{scope}[
-                x={($0.1*(image.south east)$)},
-                y={($0.1*(image.north west)$)}]
-
-                % % Grid
-                %     \draw[lightgray,step=1] (image.south west) grid (image.north east);
-                %
-                % % Axes' labels
-                %     \foreach \x in {0,1,...,10} { \node [below] at (\x,0) {\x}; }
-                %     \foreach \y in {0,1,...,10} { \node [left] at (0,\y) {\y};}
-
-                \onslide<6->{\draw[red] (0, 4.5) rectangle (10, 2.5);}
-            \end{scope}
-        \end{tikzpicture}
-        \vspace{-10pt}
-        \caption{\tiny Riemann Flux}
-\end{figure}}
-    \column{0.5\textwidth}
-    \onslide<4>{
-        \begin{tikzpicture}[remember picture,overlay]
-            \node[above left, xshift=-0cm,yshift=1cm] (image) at (current page.south east) {\includegraphics[width=8cm]{img/FlatPlateRecirculation.png}};
-        \end{tikzpicture}
-    }
-    \onslide<5->{ \begin{figure}
-        \begin{tikzpicture}
-                \node [
-                above right,
-                inner sep=0] (image) at (0,0) {\includegraphics[width=0.37\textwidth]{img/RiemannOutflow.pdf}};
-
-            % Create scope with normalized axes
-            \begin{scope}[
-                x={($0.1*(image.south east)$)},
-                y={($0.1*(image.north west)$)}]
-
-                % % Grid
-                %     \draw[lightgray,step=1] (image.south west) grid (image.north east);
-                %
-                % % Axes' labels
-                %     \foreach \x in {0,1,...,10} { \node [below] at (\x,0) {\x}; }
-                %     \foreach \y in {0,1,...,10} { \node [left] at (0,\y) {\y};}
-
-                \onslide<6->{\draw[red] (0, 4.3) rectangle (9.2, 2.3);}
-            \end{scope}
-        \end{tikzpicture}
-        \vspace{-10pt}
-        \caption{\tiny Riemann Outflow Boundary Condition Flux}
-    \end{figure}
-            }
+        \column{0.5\textwidth}
+        \onslide<+->{
+            \begin{figure}
+                \centering
+                \includegraphics[width=0.95\textwidth]{img/PerformanceBarChart.pdf}
+                \vspace{-10pt}
+                \caption{\tiny Fluids performance, DoFs fixed.\\ Run on ALCF's Polaris on two nodes (8\(\times\) NVIDIA A100)}
+                % From looking at logs in /eagle/cfdml_aesp/PolarisMilestone/Cases/8part{,P2,P3}
+                % Zulip discussion around here: https://phypid.zulipchat.com/#narrow/stream/232375-ceed-phasta/topic/field.20node.20blocking.20for.20P3.2B/near/321175758
+            \end{figure}
+            % \begin{table}
+            %     \begin{tabular}{cc}
+            %         \toprule
+            %         Order & Time per Step \\
+            %         \midrule
+            %         \(Q_1\) & 0.910\unit{\second} \\
+            %         \(Q_2\) & 0.631\unit{\second} \\
+            %         \(Q_3\) & 0.505\unit{\second} \\
+            %         \bottomrule
+            %     \end{tabular}
+                % \caption{\tiny Fluids performance, DoFs fixed.\\ Run on ALCF's Polaris on two nodes (8\(\times\) NVIDIA A100)}
+                % % From looking at logs in /eagle/cfdml_aesp/PolarisMilestone/Cases/8part{,P2,P3}
+                % % Zulip discussion around here: https://phypid.zulipchat.com/#narrow/stream/232375-ceed-phasta/topic/field.20node.20blocking.20for.20P3.2B/near/321175758
+            % \end{table}
+        }
     \end{columns}
 \end{frame}
 
-\begin{frame}{Flat Plate Boundary Layer, Zero Pressure Gradient}
-    Problem Description:
-    \begin{itemize}
-        \item \(Re_\theta \approx 970\) boundary layer at inflow, \(M \approx 0.1\)
-        \item Synthetic turbulence generation (STG) used for inflow structures
-        \item Internal damping layer (IDL) used in STG development region to prevent pressure wave growth
-        \item \textcolor{red}{asdf}
-        \item Domain size of \(\{27 \times 24 \times 4\} \delta_0\)
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{High-Order Approach}
-    \begin{itemize}
-        \item Test 3 different order elements, \(Q_1, Q_2, Q_3\) tensor-product hexes
-        \item Maintain \textit{DOF resolution} (DOFs per physical length)
-        \item DOF resolution for streamwise and spanwise was \(\Delta x^+ = 30\) and \(\Delta z^+ = 12\)
-            \begin{itemize}
-                \item For \(Q_1\), this is about half the resolution required for DNS resolution
-            \end{itemize}
-    \end{itemize}
-\end{frame}
-
-
 \begin{frame}{Support and References}
     This work was supported by....
-    \textcolor{red}{Add in sponsor support (DOE, ECP, etc)}
+    \textcolor{red}{Add in sponsor support (ALCF, FastMATH DOE, ECP, etc)}
 \end{frame}
 
 \end{document}
+
+% \begin{frame}{Flat Plate Boundary Layer, Zero Pressure Gradient}
+%     Problem Description:
+%     \begin{itemize}
+%         \item \(Re_\theta \approx 970\) boundary layer at inflow, \(M \approx 0.1\)
+%         \item Synthetic turbulence generation (STG) used for inflow structures
+%         \item Internal damping layer (IDL) used in STG development region to prevent pressure wave growth
+%         \item \textcolor{red}{asdf}
+%         \item Domain size of \(\{27 \times 24 \times 4\} \delta_0\)
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}{High-Order Approach}
+%     \begin{itemize}
+%         \item Test 3 different order elements, \(Q_1, Q_2, Q_3\) tensor-product hexes
+%         \item Maintain \textit{DOF resolution} (DOFs per physical length)
+%         \item DOF resolution for streamwise and spanwise was \(\Delta x^+ = 30\) and \(\Delta z^+ = 12\)
+%             \begin{itemize}
+%                 \item For \(Q_1\), this is about half the resolution required for DNS resolution
+%             \end{itemize}
+%     \end{itemize}
+% \end{frame}
 
 % \section{A (Very) Brief Finite Element Refresher}
 %
@@ -392,7 +443,7 @@
 %         }
 %
 % \end{frame}
-%
+
 % \begin{frame}{Finite Element Method}
 %         \onslide<+-> {
 %             Discretize the domain \(\Omega\) into elements \(\Omega^e\)
