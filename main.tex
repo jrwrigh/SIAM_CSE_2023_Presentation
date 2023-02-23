@@ -293,11 +293,25 @@
 \section{Efficient Implicit Timestepping}
 
 \begin{frame}{Implicit Timestepping}
-    Implicit timestepping requires solving:
-    \begin{equation*}
-        \diff{\mathcal{G}(\bm{Y}_{,t}, \bm{Y})}{\bm{Y}} \Delta \bm{Y} = -\mathcal{G}(\bm{Y}_{,t}, \bm{Y})
-    \end{equation*}
+    \onslide<+->{
+        Implicit timestepping requires solving:
+        \begin{equation*}
+            \diff{\mathcal{G}(\bm{Y}_{,t}, \bm{Y})}{\bm{Y}} \Delta \bm{Y} = -\mathcal{G}(\bm{Y}_{,t}, \bm{Y})
+        \end{equation*}
+    }
     \vspace{-30pt}
+    \begin{itemize}
+        \item<+-> System too large for direct solve \(\longrightarrow\) iterative solve
+        \item<+-> Krylov iterative solvers used most commonly
+        \item<+-> Krylov solvers form solution basis from \(\mathrm{span}\left\{\left[\diff{\mathcal{G}(\bm{Y}_{,t}, \bm{Y})}{\bm{Y}}\right]^n \Delta \bm{Y} \right\}_{n=0}\)
+    \end{itemize}
+    \begin{block}{Bottom Line}<+->
+        Cost of \(\diff{\mathcal{G}(\bm{Y}_{,t}, \bm{Y})}{\bm{Y}} \Delta \bm{Y}\) dominates implicit timestepping cost
+    \end{block}
+\end{frame}
+
+\begin{frame}{Jacobian Matrix-Vector Multiply Options}
+    How to compute \(\diff{\mathcal{G}(\bm{Y}_{,t}, \bm{Y})}{\bm{Y}} \Delta \bm{Y}\)?
     \begin{itemize}
         \item<2-> Store \(\frac{\mathrm{d} \mathcal{G}}{\mathrm{d}\bm{Y}}\) directly (sparse matrix representation)
             \begin{itemize}
