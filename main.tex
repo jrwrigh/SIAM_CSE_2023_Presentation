@@ -163,10 +163,15 @@
     Find \(\bm{Y}\in \mathcal{S}^h \, , \; \forall \bm v \in \mathcal{V}^h\)
     \begin{equation*}
         \begin{aligned}
-            \int_{\Omega} \bm v \cdot \left( \bm{A_0}\bm{Y}_{,t} - \bm{S}(\bm{Y}) \right)  \,\dif \Omega
-            - \int_{\Omega} \bm{v}_{,i} \cdot \bm{F}_i(\bm{Y})\, \dif\Omega
-            + \int_{\partial \Omega} \bm v \cdot \bm{F}_i(\bm{Y}) \cdot \widehat{\bm{n}}_i \,\dif \partial \Omega & \\
-            \onslide<2->{\underbrace{+ \int_{\Omega} P(\bm v)^T \, \left(\bm{A_0}\bm{Y}_{,t} + \bm{F}_{i,i}(\bm{Y}) - S(\bm{Y})
+            \only<-1>{\quad\ \ \,}\int_{\Omega} \bm v \cdot \left( \bm{A_0}\bm{Y}_{,t} - \bm{S}(\bm{Y}) \right)  \,\dif \Omega
+            \only<-1>{
+                - \int_{\Omega} \bm{v} \cdot \bm{F}_{i,i}(\bm{Y})\, \dif\Omega
+            }
+            \uncover<2->{
+                - \int_{\Omega} \bm{v}_{,i} \cdot \bm{F}_i(\bm{Y})\, \dif\Omega
+                + \int_{\partial \Omega} \bm v \cdot \bm{F}_i(\bm{Y}) \cdot \widehat{\bm{n}}_i \,\dif \partial \Omega & \\
+            }
+            \onslide<3->{\underbrace{+ \int_{\Omega} P(\bm v)^T \, \left(\bm{A_0}\bm{Y}_{,t} + \bm{F}_{i,i}(\bm{Y}) - S(\bm{Y})
             \right) \,\dif \Omega}_{\textrm{SUPG}} &= 0}
         \end{aligned}
     \end{equation*}
@@ -298,7 +303,7 @@
             \vspace{-20pt}
             \begin{itemize}
                 \item \textbf{Pros:} Just need a residual evaluation, cheap (in programming and computation)
-                \item \textbf{Cons:} Approximation, accuracy limited to \(\sqrt{\epsilon_{\text{machine}}}\)
+                \item \textbf{Cons:} Accuracy limited to \(\sqrt{\epsilon_{\text{machine}}}\), preconditiong require partial assembly
             \end{itemize}
     \end{itemize}
 \end{frame}
@@ -308,7 +313,8 @@
         \column{0.45\textwidth}
         \onslide<1->{
             \begin{align*}
-                \diff{\mathcal{G}}{\bm{Y}} \Delta \bm{Y} &= \diff{}{\bm{Y}} \left[ \PartT \ElemT \BasT \Qfunc{G} \Bas \Elem \Part \right] \Delta \bm{Y} \\
+                % \diff{\mathcal{G}}{\bm{Y}} \Delta \bm{Y} &= \diff{}{\bm{Y}} \left[ \PartT \ElemT \BasT \Qfunc{G} \Bas \Elem \Part \right] \Delta \bm{Y} \\
+                \diff{\mathcal{G}}{\bm{Y}} \Delta \bm{Y} &= \diff{}{\bm{Y}} \overbrace{\left[ \PartT \ElemT \BasT \Qfunc{G} \Bas \Elem \Part \right]}^{\mathcal G(\bm{Y}_{,t}, \bm{Y})} \Delta \bm{Y} \\
                 &= \left[ \PartT \ElemT \BasT \diff{\Qfunc{G}}{\bm{Y}}  \Bas \Elem \Part \right]\Delta \bm{Y} \\
             \end{align*}
         }
@@ -332,19 +338,17 @@
                         %     \foreach \x in {0,1,...,10} { \node [below] at (\x,0) {\x}; }
                         %     \foreach \y in {0,1,...,10} { \node [left] at (0,\y) {\y};}
 
-                        \invisible<3->{\draw[ultra thin,white,fill=white] (6.7, 0) rectangle (0, 10);}
+                        \invisible<3->{\draw[ultra thin,white,fill=white] (6.7, 0) rectangle (3.3, 10);}
                     \end{scope}
                 \end{tikzpicture}
             \end{center}
         }
     \end{columns}
+    \vspace{-20pt}
     \onslide<4->{
         \begin{itemize}
             \item \textbf{Pros:} Exact Jacobian matrix-vector product (potentially faster convergence)
-            \item \textbf{Cons:} More expensive than residual evaluation (but not by too much)
-            \begin{itemize}
-                \item Still faster than just \textit{applying} sparse \(\frac{\mathrm{d} \mathcal{G}}{\mathrm{d}\bm{Y}}\)
-            \end{itemize}
+            \item \textbf{Cons:} Preconditioning requires partial assembly
         \end{itemize}
     }
 \end{frame}
