@@ -172,7 +172,7 @@
         \begin{aligned}
             \only<-1>{\quad\ \ \,}\int_{\Omega} \bm v \cdot \left( \bm{A_0}\bm{Y}_{,t} - \bm{S}(\bm{Y}) \right)  \,\dif \Omega
             \only<-1>{
-                - \int_{\Omega} \bm{v} \cdot \bm{F}_{i,i}(\bm{Y})\, \dif\Omega
+                + \int_{\Omega} \bm{v} \cdot \bm{F}_{i,i}(\bm{Y})\, \dif\Omega
             }
             \uncover<2->{
                 - \int_{\Omega} \bm{v}_{,i} \cdot \bm{F}_i(\bm{Y})\, \dif\Omega
@@ -294,7 +294,7 @@
 \begin{frame}{Implicit Timestepping}
     Implicit timestepping requires solving:
     \begin{equation*}
-        \diff{\mathcal{G}(\bm{Y}_{,t}, \bm{Y})}{\bm{Y}} \Delta \bm{Y} = \mathcal{G}(\bm{Y}_{,t}, \bm{Y})
+        \diff{\mathcal{G}(\bm{Y}_{,t}, \bm{Y})}{\bm{Y}} \Delta \bm{Y} = -\mathcal{G}(\bm{Y}_{,t}, \bm{Y})
     \end{equation*}
     \vspace{-30pt}
     \begin{itemize}
