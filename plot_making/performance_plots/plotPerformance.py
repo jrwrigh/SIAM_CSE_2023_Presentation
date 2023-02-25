@@ -118,6 +118,9 @@ bottom = np.zeros(3)
 for event in event_label_dict.keys():
     plot_data[event] = {}
     plot_data[event]['height'] = datadf.loc[event].to_numpy().astype(float)
+    ## STOP GAP to factor in the different lag_jacobian settings for Q_1
+    if event == 'SNESJacobianEval t/s': plot_data['SNESJacobianEval t/s']['height'][0] /= 3
+    ## end STOP GAP
     plot_data[event]['bottom'] = np.copy(bottom)
     plot_data[event]['label'] = event_label_dict[event]
     bottom += plot_data[event]['height']
@@ -135,7 +138,10 @@ plot_data['KSPSolve Other']['label'] = "LinSolve Misc."
 bottom += plot_data['KSPSolve Other']['height']
 
 plot_data['Misc.'] = {}
-plot_data['Misc.']['height'] = datadf.loc['TSStep t/s'].to_numpy().astype(float) - bottom
+plot_data['Misc.']['height'] = datadf.loc['TSStep t/s'].to_numpy().astype(float) - bottom 
+## STOP GAP
+plot_data['Misc.']['height'][0] -= datadf.loc['SNESJacobianEval t/s'].to_numpy().astype(float)[0]*(2/3)
+##STOP GAP
 plot_data['Misc.']['bottom'] = np.copy(bottom)
 plot_data['Misc.']['label'] = "Misc."
 bottom += plot_data['Misc.']['height']
@@ -151,7 +157,13 @@ for key in order:
 xaxis_labels = [r'$Q_1$', r'$Q_2$', r'$Q_3$']
 fig, ax = plt.subplots()
 
-bar_labels = ['{:.2f}'.format(num) for num in datadf.loc['TSStep t/s'].to_numpy().astype(float)]
+## IMPLEMENT STOP GAP
+adjusted_solution_time = datadf.loc['TSStep t/s'].to_numpy().astype(float)
+adjusted_solution_time[0] -= datadf.loc['SNESJacobianEval t/s'].to_numpy().astype(float)[0]*(2/3)
+
+bar_labels = ['{:.2f}'.format(num) for num in adjusted_solution_time]
+
+# bar_labels = ['{:.2f}'.format(num) for num in datadf.loc['TSStep t/s'].to_numpy().astype(float)]
 
 for key, plot_kwarg in plot_kwargs.items():
     p = ax.bar(xaxis_labels, **plot_kwarg, **generic_plot_kwargs)
