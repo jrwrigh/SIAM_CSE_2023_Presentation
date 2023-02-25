@@ -368,7 +368,7 @@
     \vspace{-20pt}
     \onslide<4->{
         \begin{itemize}
-            \item \textbf{Pros:} Exact Jacobian matrix-vector product (potentially faster convergence)
+            \item \textbf{Pros:} Exact Jacobian matrix-vector product\footnote<5->{There's also the option of leaving out terms from the Jacobian. We do this with the fluids code} (potentially faster convergence)
             \item \textbf{Cons:} Preconditioning requires partial assembly, requires coding Jacobian (automatic differentiation helps though)
         \end{itemize}
     }
@@ -376,14 +376,14 @@
 
 \begin{frame}{Performance Exact Matrix-Free Jacobian via CeedOperator}
     \begin{columns}
-        \column{0.5\textwidth}
+        \column{0.6\textwidth}
         \onslide<+->{
             \begin{figure}
                 \centering
                 \begin{tikzpicture}
                     \node [
                     above right,
-                    inner sep=0] (image) at (0,0) {\includegraphics[width=0.95\textwidth]{img/OpAppEfficiency_PerfPortSolidsFig7.png}};
+                    inner sep=0] (image) at (0,0) {\includegraphics[width=1\textwidth]{img/OpAppEfficiency_PerfPortSolidsFig7.png}};
 
                     % Create scope with normalized axes
                     \begin{scope}[
@@ -398,7 +398,7 @@
                         %     \foreach \y in {0,1,...,10} { \node [left] at (0,\y) {\tiny \y};}
 
                         % Performance is 0.66, 0.88, and 2.38 GDoFs/s/GPU for Q1,Q2, and Q3 respectively
-                        \onslide<3->{
+                        \onslide<+->{
                             \draw[solids_yellow, fill=solids_yellow] (7.4, 2.32) circle(2pt);
                             \draw[solids_red,    fill=solids_red]    (7.4, 2.76) circle(2pt);
                             \draw[solids_blue,   fill=solids_blue]   (7.4, 5.76) circle(2pt);
@@ -411,17 +411,46 @@
             \end{figure}
         }
 
+        \column{0.45\textwidth}
+        \begin{itemize}
+            \item<.-> Fluids run over 2 nodes \(\longrightarrow\) network latency present
+            \item<+-> Significant increase in efficiency for \(Q_1,\, Q_2 \rightarrow Q_3\)
+        \end{itemize}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Fluids Performance Analysis}
+    \begin{columns}
         \column{0.5\textwidth}
         \onslide<+->{
             \begin{figure}
                 \centering
-                \includegraphics[width=0.95\textwidth]{img/PerformanceBarChart.pdf}
+                \includegraphics[width=1\textwidth]{img/PerformanceBarChart.pdf}
                 \vspace{-10pt}
                 \caption{\tiny Fluids performance, DoFs fixed.\\ Run on ALCF's Polaris on two nodes (8\(\times\) NVIDIA A100)}
                 % From looking at logs in /eagle/cfdml_aesp/PolarisMilestone/Cases/8part{,P2,P3}
                 % Zulip discussion around here: https://phypid.zulipchat.com/#narrow/stream/232375-ceed-phasta/topic/field.20node.20blocking.20for.20P3.2B/near/321175758
             \end{figure}
         }
+
+        \column{0.5\textwidth}
+        other stuff
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Brief Results}
+    \begin{columns}
+    \column{0.6\textwidth}
+    \begin{figure}
+        \includegraphics[width=1\textwidth]{img/upup_Re1410.pdf}
+        \caption{asdf}
+    \end{figure}
+
+    \column{0.4\textwidth}
+       \begin{itemize}
+            \item Spanwise statistics implemented to verify scale-resolving results
+            \item Results \textit{not} converged, but show realistic stress profiles
+       \end{itemize} 
     \end{columns}
 \end{frame}
 
