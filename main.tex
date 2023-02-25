@@ -70,7 +70,7 @@
 %% TODOs
 % [ ] Add references and thanks to support
 % [ ] Mention Solids performance in libCEED intro (gives better motivation)
-% [ ] (Possibly) remove references to recirculation from BC discussion (check with Ken and Jed)
+% [-] (Possibly) remove references to recirculation from BC discussion (check with Ken and Jed)
 % [-] Cleanup performance bar graph (get Q_1 results for same size problem, change label names)
 % [-] Slide 5: Fix up the overlay order with the "Simplify into residual form"
 % [-] Reverse legend order in bar chart
@@ -209,13 +209,12 @@
     \begin{itemize}
         \item<2-> Riemann Flux BCs everywhere is ideal
         \item<3-> Velocity not known \textit{a priori} \(\longrightarrow\) traditional Riemann BCs not applicable
-        \item<4-> Weak-pressure prescription ill-posed for recirculation
     \end{itemize}
-    \begin{block}{Solution}<5->
+    \begin{block}{Solution}<4->
         \vspace{-5pt}
         \begin{itemize}
-            \item<5-> Calculate \(\bm{F}_i^{\text{adv}}\) via Riemann solver, setting \(u_i^{\text{ext}} = u_i^{\text{int}}\) 
-            \item<7-> Calculate \(\bm{F}_i^{\text{diff}}\) from solution, then \(\bm{F}_i = \bm{F}_i^{\text{adv}} + \bm{F}_i^{\text{diff}}\)
+            \item<4-> Calculate \(\bm{F}_i^{\text{adv}}\) via Riemann solver, setting \(u_i^{\text{ext}} = u_i^{\text{int}}\) 
+            \item<6-> Calculate \(\bm{F}_i^{\text{diff}}\) from solution, then \(\bm{F}_i = \bm{F}_i^{\text{adv}} + \bm{F}_i^{\text{diff}}\)
         \end{itemize}
     \end{block}
         \vspace{-15pt}
@@ -239,19 +238,14 @@
                 %     \foreach \x in {0,1,...,10} { \node [below] at (\x,0) {\x}; }
                 %     \foreach \y in {0,1,...,10} { \node [left] at (0,\y) {\y};}
 
-                \onslide<6->{\draw[red, thick] (0, 4.3) rectangle (8, 2.3);}
+                \onslide<5->{\draw[red, thick] (0, 4.3) rectangle (8, 2.3);}
             \end{scope}
         \end{tikzpicture}
         \vspace{-10pt}
         \caption{\tiny Riemann Flux}
     \end{figure} }
     \column{0.5\textwidth}
-    \onslide<4>{
-        \begin{tikzpicture}[remember picture,overlay]
-            \node[above left, xshift=-0cm,yshift=1cm] (image) at (current page.south east) {\includegraphics[width=8cm]{img/FlatPlateRecirculation.png}};
-        \end{tikzpicture}
-    }
-    \onslide<5->{ \begin{figure}
+    \onslide<4->{ \begin{figure}
         \begin{tikzpicture}
                 \node [
                 above right,
@@ -269,7 +263,7 @@
                 %     \foreach \x in {0,1,...,10} { \node [below] at (\x,0) {\x}; }
                 %     \foreach \y in {0,1,...,10} { \node [left] at (0,\y) {\y};}
 
-                \onslide<6->{\draw[red, thick] (0, 4.3) rectangle (9.2, 2.3);}
+                \onslide<5->{\draw[red, thick] (0, 4.3) rectangle (9.2, 2.3);}
             \end{scope}
         \end{tikzpicture}
         \vspace{-10pt}
@@ -290,7 +284,7 @@
         \column{0.5\textwidth}
             \begin{itemize}
                 \item Cylinder in cross flow torture test
-                \item Stable for significant outflow recirculation
+                \item Stable despite recirculation %and viscous effects
                 \item Only \(p\) and \(T\) set at boundary
             \end{itemize}
     \end{columns}
