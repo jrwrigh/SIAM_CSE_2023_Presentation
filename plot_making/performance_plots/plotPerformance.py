@@ -28,6 +28,7 @@ EVENTS = {
     'PCApply',
     'MatMult',
     'MatSetValuesCOO',
+    'KSPGMRESOrthog',
 }
 
 def parse_file_content(filename):
@@ -103,8 +104,8 @@ datadf = pd.DataFrame.from_records(data)
 event_label_dict = {
     'SNESFunctionEval': r"$\mathcal{G} (\mathbf{Y}_{,t}, \mathbf{Y})$",
     'SNESJacobianEval': r"$\mathrm{d}\mathcal{G} / \mathrm{d} \mathbf{Y}$ Setup",
-    'PCSetUp': "PreCond Setup",
-    'PCApply': "PreCond Apply",
+    # 'PCSetUp': "PreCond Setup",
+    # 'PCApply': "PreCond Apply",
     'MatMult':  r"$\mathrm{d}\mathcal{G} / \mathrm{d} \mathbf{Y} \ \Delta \mathbf{Y}$ "}
 for key in list(event_label_dict.keys()):
     event_label_dict[key + ' t/s'] = event_label_dict.pop(key)
@@ -121,26 +122,46 @@ for event in event_label_dict.keys():
     plot_data[event]['label'] = event_label_dict[event]
     bottom += plot_data[event]['height']
 
-other_data = {}
-other_data['Misc.'] = {}
-other_data['Misc.']['height'] = datadf.loc['TSStep t/s'].to_numpy().astype(float) - bottom
-other_data['Misc.']['bottom'] = np.copy(bottom)
-other_data['Misc.']['label'] = "Misc."
-plot_data.update(other_data)
+plot_data['PCTotal'] = {}
+plot_data['PCTotal']['height'] = datadf.loc['PCSetUp t/s'].to_numpy().astype(float) + datadf.loc['PCApply t/s'].to_numpy().astype(float)
+plot_data['PCTotal']['bottom'] = np.copy(bottom)
+plot_data['PCTotal']['label'] = "Preconditioning"
+bottom += plot_data['PCTotal']['height']
 
+plot_data['KSPSolve Other'] = {}
+plot_data['KSPSolve Other']['height'] = datadf.loc['KSPSolve t/s'].to_numpy().astype(float) - datadf.loc['MatMult t/s'].to_numpy().astype(float) - plot_data['PCTotal']['height']
+plot_data['KSPSolve Other']['bottom'] = np.copy(bottom)
+plot_data['KSPSolve Other']['label'] = "LinSolve Misc."
+bottom += plot_data['KSPSolve Other']['height']
+
+plot_data['Misc.'] = {}
+plot_data['Misc.']['height'] = datadf.loc['TSStep t/s'].to_numpy().astype(float) - bottom
+plot_data['Misc.']['bottom'] = np.copy(bottom)
+plot_data['Misc.']['label'] = "Misc."
+bottom += plot_data['Misc.']['height']
+
+plot_kwargs = {}
+order = ['Misc.', 'PCTotal', 'SNESFunctionEval t/s', 'KSPSolve Other', 'SNESJacobianEval t/s', 'MatMult t/s']
+bottom = np.zeros(3)
+for key in order:
+    plot_kwargs[key] = plot_data[key].copy()
+    plot_kwargs[key]['bottom'] = np.copy(bottom)
+    bottom += plot_kwargs[key]['height']
 
 xaxis_labels = [r'$Q_1$', r'$Q_2$', r'$Q_3$']
 fig, ax = plt.subplots()
 
 bar_labels = ['{:.2f}'.format(num) for num in datadf.loc['TSStep t/s'].to_numpy().astype(float)]
 
-for key, plot_kwarg in plot_data.items():
+for key, plot_kwarg in plot_kwargs.items():
     p = ax.bar(xaxis_labels, **plot_kwarg, **generic_plot_kwargs)
 
-    if key == 'Misc.':
+    if key == order[-1]:
         ax.bar_label(p, bar_labels)
 
 ax.set_ylabel('Time per Step (s)')
-ax.legend()
+
+handles, labels = ax.get_legend_handles_labels()
+ax.legend(handles[::-1], labels[::-1])
 ax.grid(False)
 plt.tight_layout()
