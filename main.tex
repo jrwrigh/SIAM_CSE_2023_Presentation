@@ -156,13 +156,13 @@
             \rho u_i\\
             \rho u_i u_j + p \delta_{ij} \\
             (\rho e + p)u_i
-        \end{pmatrix}}_{\bm F_i^{\text{adv}}} +
+        \end{pmatrix}}_{\bm F_i^{\mathrm{adv}}} +
     \underbrace{
         \begin{pmatrix}
         0 \\
         -  \sigma_{ij} \\
         - \rho u_j  \sigma_{ij} - k T_{,i}
-        \end{pmatrix}}_{\bm F_i^{\text{diff}}}, \quad
+        \end{pmatrix}}_{\bm F_i^{\mathrm{diff}}}, \quad
     S(\bm{Y}) =
     - \begin{pmatrix}
         0\\
@@ -185,7 +185,7 @@
                 - \int_{\Omega} \bm{v}_{,i} \cdot \bm{F}_i(\bm{Y})\, \dif\Omega
                 + \int_{\partial \Omega} \bm v \cdot \bm{F}_i(\bm{Y}) \cdot \widehat{\bm{n}}_i \,\dif \partial \Omega & \\
             }
-            \onslide<+->{\underbrace{+ \int_{\Omega} \mathscr{L}(\bm v) \, \left(\bm{A_0}\bm{Y}_{,t} + \bm{F}_{i,i}(\bm{Y}) - S(\bm{Y})
+            \onslide<+->{\underbrace{+ \int_{\Omega} \mathscr{L}^{\mathrm{adv}}(\bm v)\bm{\tau} \, \left(\bm{A_0}\bm{Y}_{,t} + \bm{F}_{i,i}(\bm{Y}) - S(\bm{Y})
             \right) \,\dif \Omega}_{\textrm{SUPG}} &= 0}
         \end{aligned}
     \end{equation*}
@@ -369,7 +369,7 @@
     \onslide<4->{
         \begin{itemize}
             \item \textbf{Pros:} Exact Jacobian matrix-vector product (potentially faster convergence)
-            \item \textbf{Cons:} Preconditioning requires partial assembly
+            \item \textbf{Cons:} Preconditioning requires partial assembly, requires coding Jacobian (automatic differentiation helps though)
         \end{itemize}
     }
 \end{frame}
