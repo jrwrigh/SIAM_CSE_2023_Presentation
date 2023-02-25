@@ -56,6 +56,11 @@
 \newcommand{\ndof}{{n_{\mathrm{dof}}}}
 \newcommand{\nquad}{{n_{\mathrm{quad}}}}
 
+% Colors for tikz and mat-mult solids chart
+\definecolor{solids_yellow}{HTML}{E0BD6C}
+\definecolor{solids_red}{HTML}{C98190}
+\definecolor{solids_blue}{HTML}{4686C7}
+
 \begin{document}
 
 \maketitle
@@ -68,6 +73,7 @@
 % [ ] (Possibly) remove references to recirculation from BC discussion (check with Ken and Jed)
 % [-] Cleanup performance bar graph (get Q_1 results for same size problem, change label names)
 % [-] Slide 5: Fix up the overlay order with the "Simplify into residual form"
+% [ ] Reverse legend order in bar chart
 
 \section{libCEED Overview}
 
@@ -380,7 +386,31 @@
         \onslide<+->{
             \begin{figure}
                 \centering
-                \includegraphics[width=0.95\textwidth]{img/OpAppEfficiency_PerfPortSolidsFig7.png}
+                \begin{tikzpicture}
+                    \node [
+                    above right,
+                    inner sep=0] (image) at (0,0) {\includegraphics[width=0.95\textwidth]{img/OpAppEfficiency_PerfPortSolidsFig7.png}};
+
+                    % Create scope with normalized axes
+                    \begin{scope}[
+                        x={($0.1*(image.south east)$)},
+                        y={($0.1*(image.north west)$)}]
+
+                        % % Grid
+                        %     \draw[lightgray,step=1] (image.south west) grid (image.north east);
+                        %
+                        % % Axes' labels
+                        %     \foreach \x in {0,1,...,10} { \node [below] at (\x,0) {\tiny \x}; }
+                        %     \foreach \y in {0,1,...,10} { \node [left] at (0,\y) {\tiny \y};}
+
+                        % Performance is 0.66, 0.88, and 2.38 GDoFs/s/GPU for Q1,Q2, and Q3 respectively
+                        \onslide<3->{
+                            \draw[solids_yellow, fill=solids_yellow] (7.4, 2.32) circle(2pt);
+                            \draw[solids_red,    fill=solids_red]    (7.4, 2.76) circle(2pt);
+                            \draw[solids_blue,   fill=solids_blue]   (7.4, 5.76) circle(2pt);
+                        }
+                    \end{scope}
+                \end{tikzpicture}
                 \vspace{-10pt}
                 \caption{\tiny Matrix-Free Application Comparison (Reproduced from Brown \textit{et al.} 2022). Not from fluids code, but representative of libCEED matrix-free}
                 % Run on LLNL Lassen, 4xV100 GPUs. aijcusparse results in narrow DoFs range due to memory contraints.
@@ -397,20 +427,6 @@
                 % From looking at logs in /eagle/cfdml_aesp/PolarisMilestone/Cases/8part{,P2,P3}
                 % Zulip discussion around here: https://phypid.zulipchat.com/#narrow/stream/232375-ceed-phasta/topic/field.20node.20blocking.20for.20P3.2B/near/321175758
             \end{figure}
-            % \begin{table}
-            %     \begin{tabular}{cc}
-            %         \toprule
-            %         Order & Time per Step \\
-            %         \midrule
-            %         \(Q_1\) & 0.910\unit{\second} \\
-            %         \(Q_2\) & 0.631\unit{\second} \\
-            %         \(Q_3\) & 0.505\unit{\second} \\
-            %         \bottomrule
-            %     \end{tabular}
-                % \caption{\tiny Fluids performance, DoFs fixed.\\ Run on ALCF's Polaris on two nodes (8\(\times\) NVIDIA A100)}
-                % % From looking at logs in /eagle/cfdml_aesp/PolarisMilestone/Cases/8part{,P2,P3}
-                % % Zulip discussion around here: https://phypid.zulipchat.com/#narrow/stream/232375-ceed-phasta/topic/field.20node.20blocking.20for.20P3.2B/near/321175758
-            % \end{table}
         }
     \end{columns}
 \end{frame}
