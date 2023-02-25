@@ -9,8 +9,8 @@ plt.rcParams.update({
             'font.serif': 'cmr10',
             'mathtext.fontset': 'cm',
             'axes.unicode_minus': False,
-            'axes.labelsize': 14,
-            'font.size': 11,
+            'axes.labelsize': 34,
+            'font.size': 12,
             'figure.dpi': 100,
             'lines.linewidth': 1.5,
             'axes.grid': True,
@@ -155,7 +155,7 @@ for key in order:
     bottom += plot_kwargs[key]['height']
 
 xaxis_labels = [r'$Q_1$', r'$Q_2$', r'$Q_3$']
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(6.4,5.6))
 
 ## IMPLEMENT STOP GAP
 adjusted_solution_time = datadf.loc['TSStep t/s'].to_numpy().astype(float)
