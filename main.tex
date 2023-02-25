@@ -55,6 +55,7 @@
 \newcommand{\nelm}{{n_{\mathrm{elm}}}}
 \newcommand{\ndof}{{n_{\mathrm{dof}}}}
 \newcommand{\nquad}{{n_{\mathrm{quad}}}}
+\newcommand{\derd}{{{\mathrm{d}}}}
 
 % Colors for tikz and mat-mult solids chart
 \definecolor{solids_yellow}{HTML}{E0BD6C}
@@ -91,39 +92,42 @@
                 \item Computational backend selectable at runtime, using runtime compilation
             \end{itemize}
         \item<+-> Geared toward high-order finite element discretizations
+        \item<+-> Performance demonstrated for solids.......
     \end{itemize}
 
 \end{frame}
 
 \begin{frame}{Finite Element Operator Decomposition}
-    \begin{tikzpicture}
+    \onslide<2->{
+        \begin{tikzpicture}
 
-    % Include the image in a node
-    \node [
-        above right,
-        inner sep=0] (image) at (0,0) {\includegraphics[width=0.9\textwidth]{img/FEMDecomp.pdf}};
+            % Include the image in a node
+            \node [
+            above right,
+            inner sep=0] (image) at (0,0) {\includegraphics[width=0.9\textwidth]{img/FEMDecomp.pdf}};
 
-    % Create scope with normalized axes
-    \begin{scope}[
-    x={($0.1*(image.south east)$)},
-    y={($0.1*(image.north west)$)}]
+            % Create scope with normalized axes
+            \begin{scope}[
+                x={($0.1*(image.south east)$)},
+                y={($0.1*(image.north west)$)}]
 
-    % % Grid
-    %     \draw[lightgray,step=1] (image.south west) grid (image.north east);
-    %
-    % % Axes' labels
-    %     \foreach \x in {0,1,...,10} { \node [below] at (\x,0) {\x}; }
-    %     \foreach \y in {0,1,...,10} { \node [left] at (0,\y) {\y};}
+                % % Grid
+                %     \draw[lightgray,step=1] (image.south west) grid (image.north east);
+                %
+                % % Axes' labels
+                %     \foreach \x in {0,1,...,10} { \node [below] at (\x,0) {\x}; }
+                %     \foreach \y in {0,1,...,10} { \node [left] at (0,\y) {\y};}
 
-        \invisible<2->{\draw[ultra thin,white,fill=white] (10, 0.6) rectangle (1.9, 9);}
-        \invisible<3->{\draw[ultra thin,white,fill=white] (10, 1.4) rectangle (4.5, 9);}
-        \invisible<4->{\draw[ultra thin,white,fill=white] (10, 1.4) rectangle (7.1, 9);}
-        \invisible<5->{\draw[ultra thin,white,fill=white] (10, 0) rectangle (0, 2);}
-    \end{scope}
+                \invisible<3->{\draw[ultra thin,white,fill=white] (10, 0.6) rectangle (1.9, 9);}
+                \invisible<4->{\draw[ultra thin,white,fill=white] (10, 1.4) rectangle (4.5, 9);}
+                \invisible<5->{\draw[ultra thin,white,fill=white] (10, 1.4) rectangle (7.1, 9);}
+                \invisible<6->{\draw[ultra thin,white,fill=white] (10, 0) rectangle (0, 2);}
+            \end{scope}
 
-    % TODO Add a "processors" tag to the image
+            % TODO Add a "processors" tag to the image
 
-    \end{tikzpicture}
+        \end{tikzpicture}
+    }
 
 \end{frame}
 
@@ -177,7 +181,7 @@
     Find \(\bm{Y}\in \mathcal{S}^h \, , \; \forall \bm v \in \mathcal{V}^h\)
     \begin{equation*}
         \begin{aligned}
-            \only<-+>{\quad\ \ \,}\int_{\Omega} \bm v \cdot \left( \bm{A_0}\bm{Y}_{,t} - \bm{S}(\bm{Y}) \right)  \,\dif \Omega
+            \only<-+>{\quad\ \ \,}\int_{\Omega} \bm v \cdot \left[ \bm{A_0}\bm{Y}_{,t} - \bm{S}(\bm{Y}) \right]  \,\dif \Omega
             \only<-.>{
                 + \int_{\Omega} \bm{v} \cdot \bm{F}_{i,i}(\bm{Y})\, \dif\Omega
             }
@@ -185,8 +189,8 @@
                 - \int_{\Omega} \bm{v}_{,i} \cdot \bm{F}_i(\bm{Y})\, \dif\Omega
                 + \int_{\partial \Omega} \bm v \cdot \bm{F}_i(\bm{Y}) \cdot \widehat{\bm{n}}_i \,\dif \partial \Omega & \\
             }
-            \onslide<+->{\underbrace{+ \int_{\Omega} \mathscr{L}^{\mathrm{adv}}(\bm v)\bm{\tau} \, \left(\bm{A_0}\bm{Y}_{,t} + \bm{F}_{i,i}(\bm{Y}) - S(\bm{Y})
-            \right) \,\dif \Omega}_{\textrm{SUPG}} &= 0}
+            \onslide<+->{\underbrace{+ \int_{\Omega} \mathscr{L}^{\mathrm{adv}}(\bm v)\bm{\tau} \, \left[\bm{A_0}\bm{Y}_{,t} + \bm{F}_{i,i}(\bm{Y}) - S(\bm{Y})
+            \right] \,\dif \Omega}_{\textrm{SUPG}} &= 0}
         \end{aligned}
     \end{equation*}
     \vspace{-10pt}
@@ -281,7 +285,7 @@
     \vspace{-20pt}
     \onslide<4->{
         \begin{itemize}
-            \item \textbf{Pros:} Exact Jacobian matrix-vector product\footnote<5->{There's also the option of leaving out terms from the Jacobian. We do this with the fluids code} (potentially faster convergence)
+            \item \textbf{Pros:} Exact Jacobian matrix-vector product\footnote<5->{Affect of specific terms may be ignored from the Jacobian. This is done for \(\derd\bm{\tau}/\derd\bm{Y}\)} (potentially faster convergence)
             \item \textbf{Cons:} Preconditioning requires partial assembly, requires coding Jacobian (automatic differentiation helps though)
         \end{itemize}
     }
@@ -326,32 +330,58 @@
 
         \column{0.45\textwidth}
         \begin{itemize}
-            \item<.-> Fluids run over 2 nodes \(\longrightarrow\) network latency present
+                \item<.-> Significant differences with performance implications
+                \begin{itemize}
+                    \item<.-> Fluids run over 2 nodes \(\longrightarrow\) network latency present
+                    \item<.-> Solids code lower in FLOPs and storage per DoF
+                \end{itemize}
             \item<+-> Significant increase in efficiency for \(Q_1,\, Q_2 \rightarrow Q_3\)
         \end{itemize}
     \end{columns}
 \end{frame}
 
+\section{Performance and Results of Flat Plate Boundary Layer Simulation}
 \begin{frame}{Fluids Performance Analysis}
     \begin{columns}
         \column{0.5\textwidth}
         \onslide<+->{
             \begin{figure}
                 \centering
+                \vspace{-5pt}
                 \includegraphics[width=1\textwidth]{img/PerformanceBarChart.pdf}
-                \vspace{-10pt}
-                \caption{\tiny Fluids performance, DoFs fixed.\\ Run on ALCF's Polaris on two nodes (8\(\times\) NVIDIA A100)}
+                \vspace{-30pt}
+                \caption{\tiny Run on ALCF's Polaris on two nodes (8\(\times\) NVIDIA A100, global DoF count fixed}
                 % From looking at logs in /eagle/cfdml_aesp/PolarisMilestone/Cases/8part{,P2,P3}
                 % Zulip discussion around here: https://phypid.zulipchat.com/#narrow/stream/232375-ceed-phasta/topic/field.20node.20blocking.20for.20P3.2B/near/321175758
             \end{figure}
         }
 
         \column{0.5\textwidth}
-        other stuff
+        \begin{itemize}
+            \item<+-> Time of \(\derd \mathcal{G} / \derd \bm{Y} \Delta \bm{Y}\) decreases as order increases
+                \begin{itemize}
+                    \item Despite increase in \(\derd \mathcal{G} / \derd \bm{Y} \Delta \bm{Y}\) calculations per timestep:
+                        \begin{table}
+                            \begin{tabular}{ccl}
+                                \(Q_1\) & \(Q_2\) & \(Q_3\) \\
+                                \toprule
+                                % \midrule
+                                \textcolor{red}{250} & 221 & 360 \\
+                                \bottomrule
+                            \end{tabular}
+                        \end{table}
+
+                \end{itemize}
+            \item<+-> \(\derd \mathcal{G} / \derd \bm{Y}\) setup time increases with order
+                \begin{itemize}[<.->]
+                    \item Dominant cost is partial matrix assembly for preconditioning
+                    \item For \(Q_3\), eats up gains from faster \(\derd \mathcal{G} / \derd \bm{Y} \Delta \bm{Y}\) calculations
+                \end{itemize}
+        \end{itemize}
     \end{columns}
 \end{frame}
 
-\begin{frame}{Brief Results}
+\begin{frame}{Results of Flat Plate Boundary Layer}
     \begin{columns}
     \column{0.6\textwidth}
     \begin{figure}
