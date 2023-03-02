@@ -87,9 +87,17 @@ paths = {
     # 'Q3_A': Path("../../data/36-90_p3_ROPI/compFlatPlate.o371808"),
     # 'Q3_B': Path("../../data/36-90_p3_ROPI/compFlatPlate.o386583"),
 
-    'Q1': Path("../../data/8partP1/statsTestPer52.log"),
-    'Q2': Path("../../data/8partP2/compFlatPlate.o371600"),
-    'Q3': Path("../../data/8partP3/GPUAM_NoMAGMA_GLog.log"),
+    # 'Q1': Path("../../data/8partP1/statsTestPer52.log"),
+    # 'Q2': Path("../../data/8partP2/compFlatPlate.o371600"),
+    # 'Q3': Path("../../data/8partP3/GPUAM_NoMAGMA_GLog.log"),
+
+    'Q1': Path("../../data/8partP1lag9/compFlatPlate.o440064"),
+    'Q2': Path("../../data/8partP2lag9/compFlatPlate.o440091"),
+    'Q3': Path("../../data/8partP3lag9/compFlatPlate.o440114"),
+
+    'Q1_sparse': Path("../../data/8partP1lag9_sparse/compFlatPlate.o440083"),
+    'Q2_sparse': Path("../../data/8partP2lag9_sparse/compFlatPlate.o440098"),
+    'Q3_sparse': Path("../../data/8partP3lag9_sparse/compFlatPlate.o440122"),
 }
 
 data = {}
@@ -97,14 +105,24 @@ data = {}
 for key, path in paths.items():
     data[key] = parse_file_content(path)
 
+order_cases = [
+'Q1',
+'Q2',
+'Q3',
+# 'Q1_sparse',
+# 'Q2_sparse',
+# 'Q3_sparse',
+]
+
 datadf = pd.DataFrame.from_records(data)
+datadf = datadf[order_cases]
 
 #%% Plot stuff
 
 event_label_dict = {
     'SNESFunctionEval': r"$\mathcal{G} (\mathbf{Y}_{,t}, \mathbf{Y})$",
     'SNESJacobianEval': r"$\mathrm{d}\mathcal{G} / \mathrm{d} \mathbf{Y}$ Setup",
-    # 'PCSetUp': "PreCond Setup",
+    'PCSetUp': "PreCond Setup",
     # 'PCApply': "PreCond Apply",
     'MatMult':  r"$\mathrm{d}\mathcal{G} / \mathrm{d} \mathbf{Y} \ \Delta \mathbf{Y}$ "}
 for key in list(event_label_dict.keys()):
@@ -113,62 +131,52 @@ for key in list(event_label_dict.keys()):
 generic_plot_kwargs = {'width': 0.5}
 
 plot_data = {}
-bottom = np.zeros(3)
+bottom = np.zeros(len(order_cases))
 
 for event in event_label_dict.keys():
     plot_data[event] = {}
     plot_data[event]['height'] = datadf.loc[event].to_numpy().astype(float)
-    ## STOP GAP to factor in the different lag_jacobian settings for Q_1
-    if event == 'SNESJacobianEval t/s': plot_data['SNESJacobianEval t/s']['height'][0] /= 3
-    ## end STOP GAP
     plot_data[event]['bottom'] = np.copy(bottom)
     plot_data[event]['label'] = event_label_dict[event]
     bottom += plot_data[event]['height']
 
-plot_data['PCTotal'] = {}
-plot_data['PCTotal']['height'] = datadf.loc['PCSetUp t/s'].to_numpy().astype(float) + datadf.loc['PCApply t/s'].to_numpy().astype(float)
-plot_data['PCTotal']['bottom'] = np.copy(bottom)
-plot_data['PCTotal']['label'] = "Preconditioning"
-bottom += plot_data['PCTotal']['height']
+# plot_data['PCTotal'] = {}
+# plot_data['PCTotal']['height'] = datadf.loc['PCSetUp t/s'].to_numpy().astype(float) + datadf.loc['PCApply t/s'].to_numpy().astype(float)
+# plot_data['PCTotal']['bottom'] = np.copy(bottom)
+# plot_data['PCTotal']['label'] = "Preconditioning"
+# bottom += plot_data['PCTotal']['height']
 
-plot_data['KSPSolve Other'] = {}
-plot_data['KSPSolve Other']['height'] = datadf.loc['KSPSolve t/s'].to_numpy().astype(float) - datadf.loc['MatMult t/s'].to_numpy().astype(float) - plot_data['PCTotal']['height']
-plot_data['KSPSolve Other']['bottom'] = np.copy(bottom)
-plot_data['KSPSolve Other']['label'] = "LinSolve Misc."
-bottom += plot_data['KSPSolve Other']['height']
+# plot_data['KSPSolve Other'] = {}
+# plot_data['KSPSolve Other']['height'] = datadf.loc['KSPSolve t/s'].to_numpy().astype(float) - datadf.loc['MatMult t/s'].to_numpy().astype(float)
+# plot_data['KSPSolve Other']['bottom'] = np.copy(bottom)
+# plot_data['KSPSolve Other']['label'] = "LinSolve Misc."
+# bottom += plot_data['KSPSolve Other']['height']
 
 plot_data['Misc.'] = {}
-plot_data['Misc.']['height'] = datadf.loc['TSStep t/s'].to_numpy().astype(float) - bottom 
-## STOP GAP
-plot_data['Misc.']['height'][0] -= datadf.loc['SNESJacobianEval t/s'].to_numpy().astype(float)[0]*(2/3)
-##STOP GAP
+plot_data['Misc.']['height'] = datadf.loc['TSStep t/s'].to_numpy().astype(float) - bottom
 plot_data['Misc.']['bottom'] = np.copy(bottom)
 plot_data['Misc.']['label'] = "Misc."
 bottom += plot_data['Misc.']['height']
 
 plot_kwargs = {}
-order = ['Misc.', 'PCTotal', 'SNESFunctionEval t/s', 'KSPSolve Other', 'SNESJacobianEval t/s', 'MatMult t/s']
-bottom = np.zeros(3)
-for key in order:
+order_events = ['Misc.', 'PCSetUp t/s', 'SNESFunctionEval t/s', 'KSPSolve Other', 'SNESJacobianEval t/s', 'MatMult t/s']
+order_events = ['Misc.', 'PCSetUp t/s', 'SNESFunctionEval t/s', 'SNESJacobianEval t/s', 'MatMult t/s']
+# order_events = ['Misc.', 'PCSetUp t/s', 'PCApply t/s', 'SNESFunctionEval t/s', 'SNESJacobianEval t/s', 'MatMult t/s']
+bottom = np.zeros(len(order_cases))
+for key in order_events:
     plot_kwargs[key] = plot_data[key].copy()
     plot_kwargs[key]['bottom'] = np.copy(bottom)
     bottom += plot_kwargs[key]['height']
 
-xaxis_labels = [r'$Q_1$', r'$Q_2$', r'$Q_3$']
+xaxis_labels = [r'$Q_1$', r'$Q_2$', r'$Q_3$', r'$Q_1$ sparse', r'$Q_2$ sparse', r'$Q_3$ sparse']
 fig, ax = plt.subplots(figsize=(6.4,5.6))
 
-## IMPLEMENT STOP GAP
-adjusted_solution_time = datadf.loc['TSStep t/s'].to_numpy().astype(float)
-adjusted_solution_time[0] -= datadf.loc['SNESJacobianEval t/s'].to_numpy().astype(float)[0]*(2/3)
-
-bar_labels = ['{:.2f}'.format(num) for num in adjusted_solution_time]
-
-# bar_labels = ['{:.2f}'.format(num) for num in datadf.loc['TSStep t/s'].to_numpy().astype(float)]
+bar_labels = ['{:.2f}'.format(num) for num in datadf.loc['TSStep t/s'].to_numpy().astype(float)]
 
 for key, plot_kwarg in plot_kwargs.items():
-    p = ax.bar(xaxis_labels, **plot_kwarg, **generic_plot_kwargs)
+    p = ax.bar(xaxis_labels[:len(order_cases)], **plot_kwarg, **generic_plot_kwargs)
 
-    if key == order[-1]:
+    if key == order_events[-1]:
         ax.bar_label(p, bar_labels)
 
 ax.set_ylabel('Time per Step (s)')
