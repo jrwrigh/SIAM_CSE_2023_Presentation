@@ -92,10 +92,14 @@
                 \item Computational backend selectable at runtime, using runtime compilation
             \end{itemize}
         \item<+-> Geared toward high-order finite element discretizations
-        \item<+-> Performance demonstrated for solids.......
+        \item<+-> Performance demonstrated for solids in Brown \textit{et al.} 2022\footnote<.->{\textit{Performance Portable Solid Mechanics via Matrix-Free \(p\)-Multigrid}, Brown \textit{et al.}, arXiv:2204.01722}
+            \begin{itemize}
+                \item Want to apply those methods and lessons-learned to fluids
+            \end{itemize}
     \end{itemize}
 
 \end{frame}
+%1:40
 
 \begin{frame}{Finite Element Operator Decomposition}
     \onslide<2->{
@@ -121,7 +125,8 @@
                 \invisible<3->{\draw[ultra thin,white,fill=white] (10, 0.6) rectangle (1.9, 9);}
                 \invisible<4->{\draw[ultra thin,white,fill=white] (10, 1.4) rectangle (4.5, 9);}
                 \invisible<5->{\draw[ultra thin,white,fill=white] (10, 1.4) rectangle (7.1, 9);}
-                \invisible<6->{\draw[ultra thin,white,fill=white] (10, 0) rectangle (0, 2);}
+                \invisible<6->{\draw[ultra thin,white,fill=white] (10, 7.7) rectangle (9.3, 9);}
+                \invisible<7->{\draw[ultra thin,white,fill=white] (10, 0) rectangle (0, 2);}
             \end{scope}
 
             % TODO Add a "processors" tag to the image
@@ -219,7 +224,7 @@
     \vspace{-30pt}
     \begin{itemize}
         \item<+-> System too large for direct solve \(\longrightarrow\) iterative solve
-        \item<+-> Krylov iterative solvers used most commonly
+        \item<+-> Krylov subspace methods used most commonly
         \item<+-> Krylov solvers form solution basis from \(\mathrm{span}\left\{\left[\diff{\mathcal{G}(\bm{Y}_{,t}, \bm{Y})}{\bm{Y}}\right]^n \Delta \bm{Y} \right\}_{n=0}\)
     \end{itemize}
     \begin{block}{Bottom Line}<+->
@@ -242,7 +247,7 @@
             \vspace{-20pt}
             \begin{itemize}
                 \item \textbf{Pros:} Just need a residual evaluation, cheap (in programming and computation)
-                \item \textbf{Cons:} Accuracy limited to \(\sqrt{\epsilon_{\text{machine}}}\), preconditiong require partial assembly
+                \item \textbf{Cons:} Accuracy limited to \(\sqrt{\epsilon_{\text{machine}}}\), preconditioning require partial assembly
             \end{itemize}
     \end{itemize}
 \end{frame}
@@ -285,10 +290,153 @@
     \vspace{-20pt}
     \onslide<4->{
         \begin{itemize}
-            \item \textbf{Pros:} Exact Jacobian matrix-vector product\footnote<5->{Affect of specific terms may be ignored from the Jacobian. This is done for \(\derd\bm{\tau}/\derd\bm{Y}\)} (potentially faster convergence)
-            \item \textbf{Cons:} Preconditioning requires partial assembly, requires coding Jacobian (automatic differentiation helps though)
+            \item \textbf{Pros:} Exact Jacobian matrix-vector product\footnote<5->{Affect of specific terms may be ignored from the Jacobian. This is done for \(\derd\bm{\tau}/\derd\bm{Y}\)}
+            \item \textbf{Cons:} Preconditioning requires partial assembly, requires coding Jacobian
         \end{itemize}
     }
+\end{frame}
+
+% \begin{frame}{Performance Exact Matrix-Free Jacobian via CeedOperator}
+%     \begin{columns}
+%         \column{0.6\textwidth}
+%         \onslide<+->{
+%             \begin{figure}
+%                 \centering
+%                 \begin{tikzpicture}
+%                     \node [
+%                     above right,
+%                     inner sep=0] (image) at (0,0) {\includegraphics[width=1\textwidth]{img/OpAppEfficiency_PerfPortSolidsFig7.png}};
+%
+%                     % Create scope with normalized axes
+%                     \begin{scope}[
+%                         x={($0.1*(image.south east)$)},
+%                         y={($0.1*(image.north west)$)}]
+%
+%                         % % Grid
+%                         %     \draw[lightgray,step=1] (image.south west) grid (image.north east);
+%                         %
+%                         % % Axes' labels
+%                         %     \foreach \x in {0,1,...,10} { \node [below] at (\x,0) {\tiny \x}; }
+%                         %     \foreach \y in {0,1,...,10} { \node [left] at (0,\y) {\tiny \y};}
+%
+%                         % Performance is 0.66, 0.88, and 2.38 GDoFs/s/GPU for Q1,Q2, and Q3 respectively
+%                         \onslide<+->{
+%                             \draw[solids_yellow, fill=solids_yellow] (7.4, 2.32) circle(2pt);
+%                             \draw[solids_red,    fill=solids_red]    (7.4, 2.76) circle(2pt);
+%                             \draw[solids_blue,   fill=solids_blue]   (7.4, 5.76) circle(2pt);
+%                         }
+%                     \end{scope}
+%                 \end{tikzpicture}
+%                 \vspace{-10pt}
+%                 \caption{\tiny Matrix-Free Application Comparison (Reproduced from Brown \textit{et al.} 2022). Not from fluids code, but representative of libCEED matrix-free}
+%                 % Run on LLNL Lassen, 4xV100 GPUs. aijcusparse results in narrow DoFs range due to memory contraints.
+%             \end{figure}
+%         }
+%
+%         \column{0.45\textwidth}
+%         \begin{itemize}
+%                 \item<.-> Significant differences with performance implications
+%                 \begin{itemize}
+%                     \item<.-> Fluids run over 2 nodes \(\longrightarrow\) network latency present
+%                     \item<.-> Solids code lower in FLOPs and storage per DoF
+%                 \end{itemize}
+%             \item<+-> Significant increase in efficiency for \(Q_1,\, Q_2 \rightarrow Q_3\)
+%         \end{itemize}
+%     \end{columns}
+% \end{frame}
+
+\section{Performance and Results of Flat Plate Boundary Layer Simulation}
+
+\begin{frame}{Problem Description}
+    \begin{itemize}
+        \item Flat plate boundary layer with zero pressure gradient
+            \begin{itemize}
+                \item \(Re_\theta \approx 970\) boundary layer at inflow, \(M \approx 0.1\)
+                \item Synthetic turbulence generation (STG) used for inflow structures
+                \item Run at implicit large eddy simulation (ILES) resolution for linears (higher orders may be DNS level, tbd)
+            \end{itemize}
+        \item Test 3 different order elements, \(Q_1, Q_2, Q_3\) tensor-product hexes
+        \item Maintain \textit{DOF resolution} (DoFs per physical length/ global DoF count)
+        \item Performance results shown for two nodes of ALCF's Polaris (4\(\times\) NVIDIA A100 per node)
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Exact Matrix-Free Jacobian vs Sparse}
+    \begin{columns}
+        \column{0.5\textwidth}
+        \onslide<+->{
+            \begin{figure}
+                \centering
+                \vspace{-5pt}
+                \includegraphics[width=1\textwidth]{img/PerformanceBarChart_sparse.pdf}
+                \vspace{-30pt}
+            \end{figure}
+        }
+
+        \column{0.5\textwidth}
+        \begin{itemize}
+            \item<+-> Sparse \(\derd \mathcal{G} / \derd \bm{Y} \Delta \bm{Y}\) significantly slower than matrix-free
+            \item<+-> Time to assemble \(\derd \mathcal{G} / \derd \bm{Y}\) quite large
+            \item<+-> Associated costs rise with element order
+        \end{itemize}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Fluids Performance Analysis}
+    \begin{columns}
+        \column{0.5\textwidth}
+        \onslide<+->{
+            \begin{figure}
+                \centering
+                \vspace{-5pt}
+                \includegraphics[width=1\textwidth]{img/PerformanceBarChart.pdf}
+                \vspace{-30pt}
+                % From looking at logs in /eagle/cfdml_aesp/PolarisMilestone/Cases/8part{,P2,P3}
+                % Zulip discussion around here: https://phypid.zulipchat.com/#narrow/stream/232375-ceed-phasta/topic/field.20node.20blocking.20for.20P3.2B/near/321175758
+            \end{figure}
+        }
+
+        \column{0.5\textwidth}
+        \begin{itemize}
+            \item<+-> Time of \(\derd \mathcal{G} / \derd \bm{Y} \Delta \bm{Y}\) decreases as order increases
+            \item<+-> \(\derd \mathcal{G} / \derd \bm{Y}\) setup time increases with order
+                \begin{itemize}[<.->]
+                    \item Dominant cost is partial matrix assembly for preconditioning
+                    % \item For \(Q_3\), eats up gains from faster \(\derd \mathcal{G} / \derd \bm{Y} \Delta \bm{Y}\) calculations
+                \end{itemize}
+        \end{itemize}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Results of Flat Plate Boundary Layer}
+    \begin{columns}
+    \column{0.6\textwidth}
+    \begin{figure}
+        \includegraphics[width=1\textwidth]{img/upup_Re1410.pdf}
+        \caption{asdf}
+    \end{figure}
+
+    \column{0.4\textwidth}
+       \begin{itemize}
+            \item Spanwise statistics implemented to verify scale-resolving results
+            \item Results \textit{not} converged, but show realistic stress profiles
+       \end{itemize}
+       \tiny{Zaki \textit{et al.}, 2013, \textit{From Streaks to Spots and on to Turbulence: Exploring the Dynamics of Boundary Layer Transition}\\
+       Schlatter \textit{et al.}, 2010, \textit{Assessment of direct numerical simulation data of turbulent boundary layers}\\
+       Wu \textit{et al.}, 2017, \textit{Transitional–turbulent spots and turbulent–turbulent spots in boundary layers}\\}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Support and References}
+    \begin{itemize}
+        \item Research supported by US Department of Energy through DE-SC0021411 FASTMath SciDAC Institute
+        \item Argonne Leadership Computing Facility resources used for this research
+        \item We thank PETSc and libCEED developers, especially Jeremy Thompson and Junchao Zhang among many others
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Appendix Slides}
+
 \end{frame}
 
 \begin{frame}{Performance Exact Matrix-Free Jacobian via CeedOperator}
@@ -338,68 +486,6 @@
             \item<+-> Significant increase in efficiency for \(Q_1,\, Q_2 \rightarrow Q_3\)
         \end{itemize}
     \end{columns}
-\end{frame}
-
-\section{Performance and Results of Flat Plate Boundary Layer Simulation}
-\begin{frame}{Fluids Performance Analysis}
-    \begin{columns}
-        \column{0.5\textwidth}
-        \onslide<+->{
-            \begin{figure}
-                \centering
-                \vspace{-5pt}
-                \includegraphics[width=1\textwidth]{img/PerformanceBarChart.pdf}
-                \vspace{-30pt}
-                \caption{\tiny Run on ALCF's Polaris on two nodes (8\(\times\) NVIDIA A100, global DoF count fixed}
-                % From looking at logs in /eagle/cfdml_aesp/PolarisMilestone/Cases/8part{,P2,P3}
-                % Zulip discussion around here: https://phypid.zulipchat.com/#narrow/stream/232375-ceed-phasta/topic/field.20node.20blocking.20for.20P3.2B/near/321175758
-            \end{figure}
-        }
-
-        \column{0.5\textwidth}
-        \begin{itemize}
-            \item<+-> Time of \(\derd \mathcal{G} / \derd \bm{Y} \Delta \bm{Y}\) decreases as order increases
-                \begin{itemize}
-                    \item Despite increase in \(\derd \mathcal{G} / \derd \bm{Y} \Delta \bm{Y}\) calculations per timestep:
-                        \begin{table}
-                            \begin{tabular}{ccl}
-                                \(Q_1\) & \(Q_2\) & \(Q_3\) \\
-                                \toprule
-                                % \midrule
-                                \textcolor{red}{250} & 221 & 360 \\
-                                \bottomrule
-                            \end{tabular}
-                        \end{table}
-
-                \end{itemize}
-            \item<+-> \(\derd \mathcal{G} / \derd \bm{Y}\) setup time increases with order
-                \begin{itemize}[<.->]
-                    \item Dominant cost is partial matrix assembly for preconditioning
-                    \item For \(Q_3\), eats up gains from faster \(\derd \mathcal{G} / \derd \bm{Y} \Delta \bm{Y}\) calculations
-                \end{itemize}
-        \end{itemize}
-    \end{columns}
-\end{frame}
-
-\begin{frame}{Results of Flat Plate Boundary Layer}
-    \begin{columns}
-    \column{0.6\textwidth}
-    \begin{figure}
-        \includegraphics[width=1\textwidth]{img/upup_Re1410.pdf}
-        \caption{asdf}
-    \end{figure}
-
-    \column{0.4\textwidth}
-       \begin{itemize}
-            \item Spanwise statistics implemented to verify scale-resolving results
-            \item Results \textit{not} converged, but show realistic stress profiles
-       \end{itemize} 
-    \end{columns}
-\end{frame}
-
-\begin{frame}{Support and References}
-    This work was supported by....
-    \textcolor{red}{Add in sponsor support (ALCF, FastMATH DOE, ECP, etc)}
 \end{frame}
 
 \end{document}
