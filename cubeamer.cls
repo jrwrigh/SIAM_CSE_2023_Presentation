@@ -1,5 +1,9 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{cubeamer}[CU Boulder Beamer Presentation Template by @polmes]
+
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{beamer}} 
+\ProcessOptions\relax
+
 \LoadClass[aspectratio = 169]{beamer}
 \usetheme{metropolis}
 
