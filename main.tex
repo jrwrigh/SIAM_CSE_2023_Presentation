@@ -5,6 +5,7 @@
 \author[James Wright]{James Wright, Jed Brown, Kenneth Jansen, Leila Ghaffari}
 \date{February 27, 2023} % or whatever the date you are presenting in is
 \institute[University of Colorado Boulder]{Ann and H.J. Smead Department of Aerospace Engineering Sciences}
+\copyrightnotice{}
 
 \usefonttheme{professionalfonts} % required for mathspec
 \usepackage{mathspec}
@@ -187,7 +188,7 @@
     \begin{equation*}
         \begin{aligned}
             \only<-+>{\quad\ \ \,}\int_{\Omega} \bm v \cdot \left[ \bm{A_0}\bm{Y}_{,t} - \bm{S}(\bm{Y}) \right]  \,\dif \Omega
-            \only<-.>{
+            \only<-.| handout:0>{
                 + \int_{\Omega} \bm{v} \cdot \bm{F}_{i,i}(\bm{Y})\, \dif\Omega
             }
             \uncover<+->{
@@ -435,58 +436,58 @@
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Appendix Slides}
-
-\end{frame}
-
-\begin{frame}{Performance Exact Matrix-Free Jacobian via CeedOperator}
-    \begin{columns}
-        \column{0.6\textwidth}
-        \onslide<+->{
-            \begin{figure}
-                \centering
-                \begin{tikzpicture}
-                    \node [
-                    above right,
-                    inner sep=0] (image) at (0,0) {\includegraphics[width=1\textwidth]{img/OpAppEfficiency_PerfPortSolidsFig7.png}};
-
-                    % Create scope with normalized axes
-                    \begin{scope}[
-                        x={($0.1*(image.south east)$)},
-                        y={($0.1*(image.north west)$)}]
-
-                        % % Grid
-                        %     \draw[lightgray,step=1] (image.south west) grid (image.north east);
-                        %
-                        % % Axes' labels
-                        %     \foreach \x in {0,1,...,10} { \node [below] at (\x,0) {\tiny \x}; }
-                        %     \foreach \y in {0,1,...,10} { \node [left] at (0,\y) {\tiny \y};}
-
-                        % Performance is 0.66, 0.88, and 2.38 GDoFs/s/GPU for Q1,Q2, and Q3 respectively
-                        \onslide<+->{
-                            \draw[solids_yellow, fill=solids_yellow] (7.4, 2.32) circle(2pt);
-                            \draw[solids_red,    fill=solids_red]    (7.4, 2.76) circle(2pt);
-                            \draw[solids_blue,   fill=solids_blue]   (7.4, 5.76) circle(2pt);
-                        }
-                    \end{scope}
-                \end{tikzpicture}
-                \vspace{-10pt}
-                \caption{\tiny Matrix-Free Application Comparison (Reproduced from Brown \textit{et al.} 2022). Not from fluids code, but representative of libCEED matrix-free}
-                % Run on LLNL Lassen, 4xV100 GPUs. aijcusparse results in narrow DoFs range due to memory contraints.
-            \end{figure}
-        }
-
-        \column{0.45\textwidth}
-        \begin{itemize}
-                \item<.-> Significant differences with performance implications
-                \begin{itemize}
-                    \item<.-> Fluids run over 2 nodes \(\longrightarrow\) network latency present
-                    \item<.-> Solids code lower in FLOPs and storage per DoF
-                \end{itemize}
-            \item<+-> Significant increase in efficiency for \(Q_1,\, Q_2 \rightarrow Q_3\)
-        \end{itemize}
-    \end{columns}
-\end{frame}
+% \begin{frame}{Appendix Slides}
+%
+% \end{frame}
+%
+% \begin{frame}{Performance Exact Matrix-Free Jacobian via CeedOperator}
+%     \begin{columns}
+%         \column{0.6\textwidth}
+%         \onslide<+->{
+%             \begin{figure}
+%                 \centering
+%                 \begin{tikzpicture}
+%                     \node [
+%                     above right,
+%                     inner sep=0] (image) at (0,0) {\includegraphics[width=1\textwidth]{img/OpAppEfficiency_PerfPortSolidsFig7.png}};
+%
+%                     % Create scope with normalized axes
+%                     \begin{scope}[
+%                         x={($0.1*(image.south east)$)},
+%                         y={($0.1*(image.north west)$)}]
+%
+%                         % % Grid
+%                         %     \draw[lightgray,step=1] (image.south west) grid (image.north east);
+%                         %
+%                         % % Axes' labels
+%                         %     \foreach \x in {0,1,...,10} { \node [below] at (\x,0) {\tiny \x}; }
+%                         %     \foreach \y in {0,1,...,10} { \node [left] at (0,\y) {\tiny \y};}
+%
+%                         % Performance is 0.66, 0.88, and 2.38 GDoFs/s/GPU for Q1,Q2, and Q3 respectively
+%                         \onslide<+->{
+%                             \draw[solids_yellow, fill=solids_yellow] (7.4, 2.32) circle(2pt);
+%                             \draw[solids_red,    fill=solids_red]    (7.4, 2.76) circle(2pt);
+%                             \draw[solids_blue,   fill=solids_blue]   (7.4, 5.76) circle(2pt);
+%                         }
+%                     \end{scope}
+%                 \end{tikzpicture}
+%                 \vspace{-10pt}
+%                 \caption{\tiny Matrix-Free Application Comparison (Reproduced from Brown \textit{et al.} 2022). Not from fluids code, but representative of libCEED matrix-free}
+%                 % Run on LLNL Lassen, 4xV100 GPUs. aijcusparse results in narrow DoFs range due to memory contraints.
+%             \end{figure}
+%         }
+%
+%         \column{0.45\textwidth}
+%         \begin{itemize}
+%                 \item<.-> Significant differences with performance implications
+%                 \begin{itemize}
+%                     \item<.-> Fluids run over 2 nodes \(\longrightarrow\) network latency present
+%                     \item<.-> Solids code lower in FLOPs and storage per DoF
+%                 \end{itemize}
+%             \item<+-> Significant increase in efficiency for \(Q_1,\, Q_2 \rightarrow Q_3\)
+%         \end{itemize}
+%     \end{columns}
+% \end{frame}
 
 \end{document}
 
